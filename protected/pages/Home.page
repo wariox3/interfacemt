@@ -1,0 +1,4 @@
+<%@ MasterClass="Application.layouts.MainLayout" Title="Interface Ministerio Transporte" %>
+<com:TContent ID="Main">
+    
+</com:TContent>
