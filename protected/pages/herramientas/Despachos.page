@@ -1,0 +1,16 @@
+<%@ MasterClass="Application.layouts.MainLayout" Title="Interface Ministerio Transporte" %>
+<com:TContent ID="Main">
+    <div class="hero-unit">
+        <h1>Hello, world!</h1>
+        <p>This is a template for a simple marketing or informational website. It includes a large callout called the hero unit and three supporting pieces of content. Use it as a starting point to create something more unique.</p>
+        <p>
+            <a href="#" class="btn btn-primary btn-large">Learn more &raquo;</a>
+        </p>
+        <com:TForm>
+            <p>Despacho:<com:TTextBox ID="TxtNroDocumento" Columns="4"/> <com:TButton ID="BtnProcesar" Text="Procesar" OnClick="Procesar" CausesValidation ="false"/></p>     
+        </com:TForm>
+            
+        
+    </div>
+
+</com:TContent>
