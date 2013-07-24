@@ -1,16 +1,14 @@
 <?php
 prado::using("Application.pages.herramientas.General");
-class ProcesarPersonas{    
-    public function ProcesarPersonasDespacho ($cliente, $intOrdDespacho) {                
+class ProcesarManifiesto{    
+    public function ProcesarManifiesto ($cliente, $intOrdDespacho) {                
         $strResultado = "";
         $arDespacho = new DespachosRecord();
-        $arDespacho = DespachosRecord::finder()->FindByPk($intOrdDespacho);        
-        $arVehiculo = new VehiculosRecord();
-        $arVehiculo = VehiculosRecord::finder()->findByPk($arDespacho->IdVehiculo);
+        $arDespacho = DespachosRecord::finder()->FindByPk($intOrdDespacho);                
         
-        $strTenedor = $this->GenerarXMLPersona($arVehiculo->IdTenedor);
-        //$strTenedor = $this->GenerarXMLPersona(70143086);
-        $strResultado = $this->EnviarTercero($cliente, $strTenedor);
+        $strManifiesto = $this->GenerarXMLManifiesto($intOrdDespacho);
+
+        //$strResultado = $this->EnviarTercero($cliente, $strTenedor);
         /*if($strResultado == "") {
             $strPropietario = $this->GenerarXMLPersona($arVehiculo->IdPropietario);
             $strResultado = $this->EnviarTercero($cliente, $strPropietario);            
@@ -18,7 +16,7 @@ class ProcesarPersonas{
         return $strResultado;
     }
     
-    private function EnviarTercero ($cliente, $strTercero) {
+    private function EnviarManifiesto ($cliente, $strManifiesto) {
         $strResultado = "";
         if($strTercero != ""){  
             $strXmlTercero = $strTercero;
@@ -39,10 +37,8 @@ class ProcesarPersonas{
 
     }
     
-    private function GenerarXMLPersona($strCodigoPersona) {
-        
-        $arTercero = new TercerosRecord();
-        $arTercero = TercerosRecord::finder()->with_Ciudad()->FindByPk($strCodigoPersona);
+    private function GenerarXMLManfiesto($intOrdDespacho) {
+
         $strTerceroXML = "";
         if(count($arTercero) > 0) {
             $strTerceroXML = "<?xml version='1.0' encoding='ISO-8859-1' ?>

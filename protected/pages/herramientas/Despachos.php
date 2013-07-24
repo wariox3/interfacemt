@@ -30,8 +30,7 @@ class Despachos extends TPage {
             $strResultados = $objProcesarPersonas->ProcesarPersonasDespacho($cliente, $intOrdDespacho);                    
             if($strResultados != "") {
                 $this->LblMensaje->text = "Despacho: " . $intOrdDespacho . " " . $strResultados;
-            }            
-            
+            }                                    
         }               
     }    
 
