@@ -24,7 +24,7 @@
 
   <services>
     <service id="page" class="TPageService" DefaultPage="Home">
-      <pages Title="Interface Ministerio Transporte" />
+      <pages Theme="Default" Title="Interface Ministerio Transporte" />
     </service>
   </services>
 </application>

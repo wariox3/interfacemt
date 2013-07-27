@@ -9,6 +9,16 @@ class General{
             return "Error al conectar el servicio: " . $e;            
         }        
     }
+    
+    public static function InsertarErrorWS ($intTipo, $strModulo, $strReferencia, $strError) {
+        $arError = new ErroresWSRecord();
+        $arError->fecha = date('Y-m-d H:i:s');;
+        $arError->tipo = $intTipo;
+        $arError->modulo = $strModulo;
+        $arError->referencia = $strReferencia;
+        $arError->error = $strError;
+        $arError->save();
+    }
 }
 
 ?>

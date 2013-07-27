@@ -7,7 +7,7 @@
                 DataKeyField="OrdDespacho"
                 AutoGenerateColumns="false"
                 AllowPaging="true"
-                PageSize="20"
+                PageSize="10"
                 CssClass="datagrid-datos"
                 PagerStyle.Mode="Numeric"
                 PagerStyle.HorizontalAlign="Right"
@@ -34,6 +34,12 @@
                     HeaderStyle.Width="80px"
                     DataField="ManElectronico"/>                
                 
+                <com:TBoundColumn
+                    ID="ClmEnvioPersona"
+                    HeaderText="Personas"
+                    HeaderStyle.Width="5px"
+                    DataField="EnvioPersona"/>                
+                
                 <com:TTemplateColumn ID="ClmSeleccionar" HeaderText="" ItemStyle.HorizontalAlign="Center" HeaderStyle.Width="20px" >
                     <prop:ItemTemplate>
                         <com:TCheckBox
@@ -52,8 +58,48 @@
                 </com:TTemplateColumn>                
 
             </com:TDataGrid>
-            <com:TButton ID="BtnGenerarSeleccionados" OnClick="procesarDespachoVarios" Text="Generar seleccionados"/>
+            <com:TButton ID="BtnGenerarSeleccionados" OnClick="procesarDespachoVarios" Text="Generar seleccionados" visible ="false"/>
             <com:TActiveLabel ID="LblMensaje" Text =""/>
+            <br /><br /><br />
+            <com:TDataGrid
+                ID="DGErrores"
+                DataKeyField="Codigo"
+                AutoGenerateColumns="false"
+                AllowPaging="true"
+                PageSize="5"
+                PagerStyle.Mode="Numeric"
+                PagerStyle.HorizontalAlign="Right">
+
+                <com:TBoundColumn
+                    ID="ClmCodigo"
+                    HeaderText="Codigo"
+                    HeaderStyle.Width="100px"
+                    DataField="codigo"/>
+                
+                <com:TBoundColumn
+                    ID="ClmFecha"
+                    HeaderText="Fecha"
+                    HeaderStyle.Width="20px"
+                    DataField="fecha"/>
+                
+                <com:TBoundColumn
+                    ID="ClmModulo"
+                    HeaderText="Modulo"
+                    HeaderStyle.Width="80px"
+                    DataField="modulo"/>
+
+                <com:TBoundColumn
+                    ID="ClmReferencia"
+                    HeaderText="Referencia"
+                    HeaderStyle.Width="80px"
+                    DataField="referencia"/>                
+                
+                <com:TBoundColumn
+                    ID="ClmError"
+                    HeaderText="Error"
+                    HeaderStyle.Width="400px"
+                    DataField="error"/>                               
+            </com:TDataGrid>            
         </com:TForm>                    
     </div>
 

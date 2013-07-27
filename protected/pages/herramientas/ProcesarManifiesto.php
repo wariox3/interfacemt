@@ -1,73 +1,55 @@
 <?php
 prado::using("Application.pages.herramientas.General");
-class ProcesarManifiesto{    
-    public function ProcesarManifiesto ($cliente, $intOrdDespacho) {                
-        $strResultado = "";
+class ProcesarManifiesto{        
+       
+    
+    public function GenerarXMLManfiesto($arDespachoParam) {   
         $arDespacho = new DespachosRecord();
-        $arDespacho = DespachosRecord::finder()->FindByPk($intOrdDespacho);                
-        
-        $strManifiesto = $this->GenerarXMLManifiesto($intOrdDespacho);
-
-        //$strResultado = $this->EnviarTercero($cliente, $strTenedor);
-        /*if($strResultado == "") {
-            $strPropietario = $this->GenerarXMLPersona($arVehiculo->IdPropietario);
-            $strResultado = $this->EnviarTercero($cliente, $strPropietario);            
-        }*/
-        return $strResultado;
-    }
-    
-    private function EnviarManifiesto ($cliente, $strManifiesto) {
-        $strResultado = "";
-        if($strTercero != ""){  
-            $strXmlTercero = $strTercero;
-            $strTercero = array('' => $strTercero);        
-            $respuesta = "";
-            try {
-                $respuesta = $cliente->__soapCall('AtenderMensajeRNDC', $strTercero);
-            } catch (Exception $e) {            
-                $strResultado = "Error al enviar parametros:" . $e;
-            }        
-            $cadena_xml = simplexml_load_string($respuesta);
-            if($strResultado == "") {
-                if($cadena_xml->ErrorMSG != "")
-                    $strResultado = $strResultado . "ErrorMSG:" . $cadena_xml->ErrorMSG . $strXmlTercero;                                                
-            }
-        }
-        return $strResultado;
-
-    }
-    
-    private function GenerarXMLManfiesto($intOrdDespacho) {
-
-        $strTerceroXML = "";
-        if(count($arTercero) > 0) {
-            $strTerceroXML = "<?xml version='1.0' encoding='ISO-8859-1' ?>
-                            <root>
-                                <acceso>
-                                    <username>LOGI@2446LOGICUARTAS</username>
-				    <password>Lo15me_A24</password>
-                                </acceso>
-				<solicitud>
-                                    <tipo>1</tipo>
-                                    <procesoid>11</procesoid>
-				</solicitud>
-                                <variables>
-                                    <NUMNITEMPRESATRANSPORTE>9004861213</NUMNITEMPRESATRANSPORTE>
-                                    <CODTIPOIDTERCERO>". $arTercero->TpDoc ."</CODTIPOIDTERCERO>
-                                    <NUMIDTERCERO>" . $arTercero->IDTercero . "</NUMIDTERCERO>
-                                    <NOMIDTERCERO>" . utf8_decode($arTercero->Nombre) . "</NOMIDTERCERO>
-                                    <PRIMERAPELLIDOIDTERCERO>" . utf8_decode($arTercero->Apellido1) . "</PRIMERAPELLIDOIDTERCERO>
-                                    <SEGUNDOAPELLIDOIDTERCERO>" . utf8_decode($arTercero->Apellido2) . "</SEGUNDOAPELLIDOIDTERCERO>
-                                    <CODSEDETERCERO>0</CODSEDETERCERO>
-                                    <NUMTELEFONOCONTACTO>" . $arTercero->Telefono . "</NUMTELEFONOCONTACTO>
-                                    <NUMCELULARPERSONA>" . $arTercero->Celular . "</NUMCELULARPERSONA>
-                                    <NOMENCLATURADIRECCION>" . $arTercero->Direccion . "</NOMENCLATURADIRECCION>
-                                    <CODMUNICIPIORNDC>" . $arTercero->Ciudad->CodMinTrans . "</CODMUNICIPIORNDC> 
-                                </variables>
-                            </root>";             
+        $arDespacho = $arDespachoParam;
+        $strDespachoXML = "";
+        if(count($arDespacho) > 0) {
+            $strDespachoXML = 
+"<?xml version='1.0' encoding='ISO-8859-1' ?>
+    <root>
+        <acceso>
+            <username>LOGI@2446LOGICUARTAS</username>
+            <password>Lo15me_A24</password>
+	</acceso>
+	<solicitud>
+            <tipo>1</tipo>
+            <procesoid>4</procesoid>
+	</solicitud>
+        <variables>
+            <NUMNITEMPRESATRANSPORTE>9004861213</NUMNITEMPRESATRANSPORTE>
+            <NUMMANIFIESTOCARGA>1962</NUMMANIFIESTOCARGA>
+            <CODOPERACIONTRANSPORTE>P</CODOPERACIONTRANSPORTE>
+            <FECHAEXPEDICIONMANIFIESTO>15/06/2013</FECHAEXPEDICIONMANIFIESTO>
+            <CODMUNICIPIOORIGENMANIFIESTO>05001000</CODMUNICIPIOORIGENMANIFIESTO>
+            <CODMUNICIPIODESTINOMANIFIESTO>05887000</CODMUNICIPIODESTINOMANIFIESTO>
+            <CODIDTITULARMANIFIESTO>N</CODIDTITULARMANIFIESTO>
+            <NUMIDTITULARMANIFIESTO>9004861213</NUMIDTITULARMANIFIESTO>
+            <NUMPLACA>TMY281</NUMPLACA>
+            <CODIDCONDUCTOR>C</CODIDCONDUCTOR>
+            <NUMIDCONDUCTOR>70516596</NUMIDCONDUCTOR>
+            <VALORFLETEPACTADOVIAJE>0</VALORFLETEPACTADOVIAJE>
+            <RETENCIONFUENTEMANIFIESTO>0</RETENCIONFUENTEMANIFIESTO>
+            <RETENCIONICAMANIFIESTOCARGA>0</RETENCIONICAMANIFIESTOCARGA>
+            <VALORANTICIPOMANIFIESTO>0</VALORANTICIPOMANIFIESTO>
+            <FECHAPAGOSALDOMANIFIESTO>25/06/2013</FECHAPAGOSALDOMANIFIESTO>
+            <CODRESPONSABLEPAGOCARGUE>E</CODRESPONSABLEPAGOCARGUE>
+            <CODRESPONSABLEPAGODESCARGUE>E</CODRESPONSABLEPAGODESCARGUE>
+            <OBSERVACIONES>COSTA</OBSERVACIONES>
+            <CODMUNICIPIOPAGOSALDO>05001000</CODMUNICIPIOPAGOSALDO>
+            <REMESASMAN procesoid='43'>
+                <REMESA><CONSECUTIVOREMESA>10026623</CONSECUTIVOREMESA></REMESA>
+                <REMESA><CONSECUTIVOREMESA>10052094</CONSECUTIVOREMESA></REMESA>
+                <REMESA><CONSECUTIVOREMESA>10062277</CONSECUTIVOREMESA></REMESA>
+            </REMESASMAN>
+        </variables>
+    </root>";             
         }
        
-        return $strTerceroXML;
+        return $strDespachoXML;
     }
 }
 

@@ -73,11 +73,15 @@ class DespachosRecord extends TActiveRecord
 	}
         
         public function DevDespachosPendientes() {
-            $strSql = "SELECT OrdDespacho, ManElectronico, IdManifiesto
+            $strSql = "SELECT despachos.OrdDespacho, ManElectronico, IdManifiesto, EnvioPersona
                         FROM despachos
+                        LEFT JOIN despachos_control_mt ON despachos.OrdDespacho = despachos_control_mt.OrdDespacho
                         WHERE FhExpedicion >= '2013/07/10' AND IdManifiesto > 0";
-            $arDespachos = DespachosRecord::finder()->findAllBySql($strSql);            
+            $arDespachos = DespachosRecord::finder('DespachosExtRecord')->findAllBySql($strSql);            
             return $arDespachos;            
         }
+}
+class DespachosExtRecord extends DespachosRecord {
+    	public $EnvioPersona;
 }
 ?>
