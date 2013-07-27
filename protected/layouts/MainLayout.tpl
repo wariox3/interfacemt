@@ -34,20 +34,20 @@
             <span class="icon-bar"></span>
             <span class="icon-bar"></span>
           </button>
-          <a class="brand" href="#">Project name</a>
+          <a class="brand" href="#">Interface MT 1.0</a>
           <div class="nav-collapse collapse">
             <p class="navbar-text pull-right">Logged in as
               <a href="#" class="navbar-link">Username</a>
             </p>
             <ul class="nav">
               <li class="active">
-                <a href="#">Home</a>
+                <a href="#">Inicio</a>
               </li>
               <li>
-                <a href="">About</a>
+                <a href="">Acerca de</a>
               </li>
               <li>
-                <a href="">Contact</a>
+                <a href="">Contactenos</a>
               </li>
             </ul>
           </div>
@@ -61,44 +61,20 @@
           <div class="well sidebar-nav">
             <ul class="nav nav-list">
               <li class="nav-header">Herramientas</li>
-              <li class="active">
-                <a href="#">Link</a>
-              </li>
-              <li><com:THyperLink Text="Despachos" NavigateUrl="?page=herramientas.Despachos"/></li>
+              <li class="active"><com:THyperLink  Text="Interface despachos" NavigateUrl="?page=herramientas.Despachos"/></li>              
+              <li><com:THyperLink Text="Log errores" NavigateUrl="?page=herramientas.Despachos"/></li>
               <li>
-                <a href="#">Link</a>
-              </li>
+                <a href="#">Datos Adicionales</a>
+              </li>             
+              <li class="nav-header">Control</li>
               <li>
-                <a href="#">Link</a>
-              </li>
-              <li class="nav-header">Sidebar</li>
-              <li>
-                <a href="#">Link</a>
+                <a href="#">Despachos reportados</a>
               </li>
               <li>
-                <a href="#">Link</a>
+                <a href="#">Cumplir despachos</a>
               </li>
               <li>
-                <a href="#">Link</a>
-              </li>
-              <li>
-                <a href="#">Link</a>
-              </li>
-              <li>
-                <a href="#">Link</a>
-              </li>
-              <li>
-                <a href="#">Link</a>
-              </li>
-              <li class="nav-header">Sidebar</li>
-              <li>
-                <a href="#">Link</a>
-              </li>
-              <li>
-                <a href="#">Link</a>
-              </li>
-              <li>
-                <a href="#">Link</a>
+                <a href="#">Cumplir remesas</a>
               </li>
             </ul>
           </div>

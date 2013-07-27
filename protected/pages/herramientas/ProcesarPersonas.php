@@ -14,7 +14,7 @@ class ProcesarPersonas {
                     $intResultado = 1;
                 } catch (Exception $e) {
                     $intResultado = 0;
-                    General::InsertarErrorWS(1, "General", "Error al enviar parametros" . $e);                
+                    General::InsertarErrorWS(1, "General", "", "Error al enviar parametros" . $e);                
                 }                    
                 $cadena_xml = simplexml_load_string($respuesta);
                 if($intResultado == 1) {
@@ -95,6 +95,19 @@ class ProcesarPersonas {
                 General::InsertarErrorWS(3, "Personas", $strCodigoPersona, "El numero de telefono debe ser de 7 digitos");
             }                
         }
+        
+        if($arTercero->Celular != "") {
+            if(strlen($arTercero->Celular) != 10) {
+                $intResultado = FALSE;
+                General::InsertarErrorWS(3, "Personas", $strCodigoPersona, "El numero de celular debe ser de 10 digitos");
+            }                
+        }        
+        
+        if($arTercero->Telefono == "" && $arTercero->Celular == "") {
+            $intResultado = FALSE;
+            General::InsertarErrorWS(3, "Personas", $strCodigoPersona, "El tercero debe tener celular o telefono");            
+        }
+        
         return $intResultado;
     }
 }

@@ -19,8 +19,8 @@ class Despachos extends TPage {
     
     public function procesarDespacho($intOrdDespacho) {        
         $intResultados = 3;
-        $objGeneral = new General();                
-        $objProcesarPersonas = new ProcesarPersonas();        
+        $intNumeroIntentos = 30;
+        $objGeneral = new General();                        
         $objProcesarManifiesto = new ProcesarManifiesto;        
         $cliente = $objGeneral->CrearConexion();
         $arDespacho = new DespachosRecord();
@@ -35,11 +35,7 @@ class Despachos extends TPage {
         else {
             //Procesar personas          
             if($arDespachoControMT->EnvioPersona == 0) {
-                $intIntentos = 0;
-                while ($intResultados == 3 && $intIntentos <= 20) { 
-                    $intResultados = $objProcesarPersonas->EnviarTercero($cliente, $arVehiculo->IdTenedor);            
-                    $intIntentos++;
-                }
+                $intResultados = $this->enviarPersonasDespacho($cliente, $intOrdDespacho);
                 if($intResultados == 1)
                     $arDespachoControMT->EnvioPersona = 1;
             }
@@ -71,7 +67,7 @@ class Despachos extends TPage {
             }
         }
     }    
-    
+            
     public function cargarErrores() {
         $arErrores = new ErroresWSRecord();
         $criteria = new TActiveRecordCriteria;            
@@ -80,11 +76,30 @@ class Despachos extends TPage {
         $this->DGErrores->DataSource = $arErrores;
         $this->DGErrores->DataBind();        
     }
+    
     public function cargarDespachos() {
         $arDespachos = new DespachosRecord();
         $arDespachos = $arDespachos->DevDespachosPendientes();
         $this->DGDespachos->DataSource = $arDespachos;
         $this->DGDespachos->DataBind();        
+    }
+    
+    public function enviarPersonasDespacho($cliente, $intOrdDespacho) {
+        $intNumeroIntentos = 30;
+        $objProcesarPersonas = new ProcesarPersonas();        
+        //$arDespacho = new DespachosRecord();
+        $arDespacho = DespachosRecord::finder()->FindByPk($intOrdDespacho);        
+        //$arVehiculo = new VehiculosRecord();
+        $arVehiculo = VehiculosRecord::finder()->findByPk($arDespacho->IdVehiculo);
+        $intResultados = 3;
+        $intIntentos = 0;        
+        while ($intResultados == 3 && $intIntentos <= $intNumeroIntentos) { 
+            $intResultados = $objProcesarPersonas->EnviarTercero($cliente, $arVehiculo->IdTenedor);            
+            $intIntentos++;
+        }
+        if($intResultados == 3) 
+            General::InsertarErrorWS(1, "Personas", $arVehiculo->IdTenedor, "Al insertar tenedor " . $intIntentos. " intentos, error de coneccion con el servidor del ministerio");
+        return $intResultados;
     }
 }
 

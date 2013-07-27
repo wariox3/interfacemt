@@ -76,7 +76,7 @@ class DespachosRecord extends TActiveRecord
             $strSql = "SELECT despachos.OrdDespacho, ManElectronico, IdManifiesto, EnvioPersona
                         FROM despachos
                         LEFT JOIN despachos_control_mt ON despachos.OrdDespacho = despachos_control_mt.OrdDespacho
-                        WHERE FhExpedicion >= '2013/07/10' AND IdManifiesto > 0";
+                        WHERE FhExpedicion >= '2013/07/10' AND IdManifiesto > 0 AND Enviado = 0";
             $arDespachos = DespachosRecord::finder('DespachosExtRecord')->findAllBySql($strSql);            
             return $arDespachos;            
         }
