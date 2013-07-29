@@ -3,8 +3,13 @@ prado::using("Application.pages.herramientas.General");
 class ProcesarPersonas {    
     
     public function EnviarTercero ($cliente, $strTercero) {
+        $arTercero = new TercerosRecord();
+        $arTercero = TercerosRecord::finder()->with_Ciudad()->FindByPk($strTercero);
         $intResultado = 0;
-        if($strTercero != ""){
+        if($arTercero->ActualizadoWebServices == 1)
+            $intResultado = 1;            
+        
+        if($strTercero != "" && $intResultado != 1){
             $strXmlTercero = $this->GenerarXMLPersona($strTercero);  
             if($strXmlTercero != "") {
                 $strXmlTercero = array('' => $strXmlTercero);                    
@@ -40,12 +45,18 @@ class ProcesarPersonas {
                     }
                     
                 }                
-            }            
+            }
+            if($intResultado == 1) {
+                $arTercero->ActualizadoWebServices = 1;
+                $arTercero->save();
+            }
         }
         return $intResultado;
     }
     
     public function GenerarXMLPersona($strCodigoPersona) {
+        $arConfiguracion = new ConfiguracionRecord();
+        $arConfiguracion = ConfiguracionRecord::finder()->findByPk(1);        
         $strTerceroXML = "";
         if($this->validarPersona($strCodigoPersona) == true) {
             $arTercero = new TercerosRecord();
@@ -54,15 +65,15 @@ class ProcesarPersonas {
                 $strTerceroXML = "<?xml version='1.0' encoding='ISO-8859-1' ?>
                                 <root>
                                     <acceso>
-                                        <username>entregandomed@0841</username>
-                                        <password>TKLLUVTPHT</password>
+                                        <username>$arConfiguracion->UsuarioWS</username>
+                                        <password>$arConfiguracion->ClaveWS</password>
                                     </acceso>
                                     <solicitud>
                                         <tipo>1</tipo>
                                         <procesoid>11</procesoid>
                                     </solicitud>
                                     <variables>
-                                        <NUMNITEMPRESATRANSPORTE>8300379211</NUMNITEMPRESATRANSPORTE>
+                                        <NUMNITEMPRESATRANSPORTE>$arConfiguracion->EmpresaWS</NUMNITEMPRESATRANSPORTE>
                                         <CODTIPOIDTERCERO>". $arTercero->TpDoc ."</CODTIPOIDTERCERO>
                                         <NUMIDTERCERO>" . $arTercero->IDTercero . "</NUMIDTERCERO>
                                         <NOMIDTERCERO>" . utf8_decode($arTercero->Nombre) . "</NOMIDTERCERO>

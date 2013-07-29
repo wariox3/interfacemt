@@ -36,9 +36,15 @@
                 
                 <com:TBoundColumn
                     ID="ClmEnvioPersona"
-                    HeaderText="Personas"
+                    HeaderText="Per"
                     HeaderStyle.Width="5px"
                     DataField="EnvioPersona"/>                
+
+                <com:TBoundColumn
+                    ID="ClmEnvioVehiculo"
+                    HeaderText="Veh"
+                    HeaderStyle.Width="5px"
+                    DataField="EnvioVehiculo"/>                 
                 
                 <com:TTemplateColumn ID="ClmSeleccionar" HeaderText="" ItemStyle.HorizontalAlign="Center" HeaderStyle.Width="20px" >
                     <prop:ItemTemplate>

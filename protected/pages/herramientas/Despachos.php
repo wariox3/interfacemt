@@ -1,6 +1,6 @@
 <?php
 prado::using("Application.pages.herramientas.ProcesarPersonas");
-prado::using("Application.pages.herramientas.ProcesarManifiesto");
+prado::using("Application.pages.herramientas.ProcesarVehiculo");
 prado::using("Application.pages.herramientas.General");
 class Despachos extends TPage {
     public function OnInit($param) {
@@ -20,8 +20,7 @@ class Despachos extends TPage {
     public function procesarDespacho($intOrdDespacho) {        
         $intResultados = 3;
         $intNumeroIntentos = 30;
-        $objGeneral = new General();                        
-        $objProcesarManifiesto = new ProcesarManifiesto;        
+        $objGeneral = new General();                                       
         $cliente = $objGeneral->CrearConexion();
         $arDespacho = new DespachosRecord();
         $arDespacho = DespachosRecord::finder()->FindByPk($intOrdDespacho);        
@@ -39,19 +38,14 @@ class Despachos extends TPage {
                 if($intResultados == 1)
                     $arDespachoControMT->EnvioPersona = 1;
             }
-
-            $arDespachoControMT->save();
+            //Procesar vehiculo          
+            if($arDespachoControMT->EnvioVehiculo == 0) {
+                $intResultados = $this->enviarVehiculoDespacho($cliente, $intOrdDespacho);
+                if($intResultados == 1)
+                    $arDespachoControMT->EnvioVehiculo = 1;
+            }            
             
-            
-            /*$strTenedor = $objProcesarPersonas->GenerarXMLPersona($arVehiculo->IdPropietario);            
-            $strResultado = $objProcesarPersonas->EnviarTercero($cliente, $strTenedor);            
-            if($strResultados != "") {
-                $this->LblMensaje->text = $this->LblMensaje->text .  "Despacho: " . $intOrdDespacho . " " . $strResultados . "<br/>";
-            }*/   
-            
-            //Procesar manifiesto
-            //$strManifiesto = $objProcesarManifiesto->GenerarXMLManfiesto($arDespacho);            
-            
+            $arDespachoControMT->save();                      
             
         }
         $this->cargarErrores();
@@ -85,12 +79,13 @@ class Despachos extends TPage {
     }
     
     public function enviarPersonasDespacho($cliente, $intOrdDespacho) {
-        $intNumeroIntentos = 30;
+        $intNumeroIntentos = 80;
         $objProcesarPersonas = new ProcesarPersonas();        
-        //$arDespacho = new DespachosRecord();
+        $arDespacho = new DespachosRecord();
         $arDespacho = DespachosRecord::finder()->FindByPk($intOrdDespacho);        
-        //$arVehiculo = new VehiculosRecord();
+        $arVehiculo = new VehiculosRecord();
         $arVehiculo = VehiculosRecord::finder()->findByPk($arDespacho->IdVehiculo);
+        
         $intResultados = 3;
         $intIntentos = 0;        
         while ($intResultados == 3 && $intIntentos <= $intNumeroIntentos) { 
@@ -98,7 +93,48 @@ class Despachos extends TPage {
             $intIntentos++;
         }
         if($intResultados == 3) 
-            General::InsertarErrorWS(1, "Personas", $arVehiculo->IdTenedor, "Al insertar tenedor " . $intIntentos. " intentos, error de coneccion con el servidor del ministerio");
+            General::InsertarErrorWS(1, "Personas", $arVehiculo->IdTenedor, "Al insertar tenedor " . $intIntentos. " intentos, error de conexion con el servidor del ministerio");
+
+        if($intResultados == 1) {
+            $intResultados = 3;
+            $intIntentos = 0;        
+            while ($intResultados == 3 && $intIntentos <= $intNumeroIntentos) { 
+                $intResultados = $objProcesarPersonas->EnviarTercero($cliente, $arVehiculo->IdPropietario);            
+                $intIntentos++;
+            }
+            if($intResultados == 3) 
+                General::InsertarErrorWS(1, "Personas", $arVehiculo->IdTenedor, "Al insertar propietario " . $intIntentos. " intentos, error de conexion con el servidor del ministerio");            
+            
+            if($intResultados == 1) {            
+                $intResultados = 3;
+                $intIntentos = 0;        
+                while ($intResultados == 3 && $intIntentos <= $intNumeroIntentos) { 
+                    $intResultados = $objProcesarPersonas->EnviarTercero($cliente, $arVehiculo->IdAseguradora);            
+                    $intIntentos++;
+                }
+                if($intResultados == 3) 
+                    General::InsertarErrorWS(1, "Personas", $arVehiculo->IdTenedor, "Al insertar aseguradora " . $intIntentos. " intentos, error de conexion con el servidor del ministerio");                            
+            }
+        }
+
+        
+        return $intResultados;
+    }
+    
+    public function enviarVehiculoDespacho($cliente, $intOrdDespacho) {
+        $intNumeroIntentos = 5;
+        $objProcesarVehiculos = new ProcesarVehiculo();        
+        $arDespacho = new DespachosRecord();
+        $arDespacho = DespachosRecord::finder()->FindByPk($intOrdDespacho);        
+        $intResultados = 3;
+        $intIntentos = 0;        
+        while ($intResultados == 3 && $intIntentos <= $intNumeroIntentos) { 
+            $intResultados = $objProcesarVehiculos->EnviarVehiculo($cliente, $arDespacho->IdVehiculo);            
+            $intIntentos++;
+        }
+        if($intResultados == 3) 
+            General::InsertarErrorWS(1, "Vehiculos", $arDespacho->IdVehiculo, "Al insertar vehiculo " . $intIntentos. " intentos, error de conexion con el servidor del ministerio");
+        
         return $intResultados;
     }
 }

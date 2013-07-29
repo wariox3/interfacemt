@@ -19,6 +19,7 @@ class TercerosRecord extends TActiveRecord
 	public $Email;
 	public $Inactivo;
         public $Celular;
+        public $ActualizadoWebServices;
         public $Ciudad; //Array de tipo (Conceptos)
         public static $RELATIONS = array(
             'Ciudad' => array(self::BELONGS_TO, 'CiudadesRecord', 'IdCiudad'),
