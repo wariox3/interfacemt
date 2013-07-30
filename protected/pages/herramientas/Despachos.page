@@ -69,7 +69,7 @@
             <br /><br /><br />
             <com:TDataGrid
                 ID="DGErrores"
-                DataKeyField="Codigo"
+                DataKeyField="codigo"
                 AutoGenerateColumns="false"
                 AllowPaging="true"
                 PageSize="5"

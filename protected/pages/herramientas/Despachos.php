@@ -38,12 +38,15 @@ class Despachos extends TPage {
                 if($intResultados == 1)
                     $arDespachoControMT->EnvioPersona = 1;
             }
-            //Procesar vehiculo          
-            if($arDespachoControMT->EnvioVehiculo == 0) {
-                $intResultados = $this->enviarVehiculoDespacho($cliente, $intOrdDespacho);
-                if($intResultados == 1)
-                    $arDespachoControMT->EnvioVehiculo = 1;
-            }            
+            if($intResultados == 1) {
+                //Procesar vehiculo          
+                if($arDespachoControMT->EnvioVehiculo == 0) {
+                    $intResultados = $this->enviarVehiculoDespacho($cliente, $intOrdDespacho);
+                    if($intResultados == 1)
+                        $arDespachoControMT->EnvioVehiculo = 1;
+                }                
+            }
+            
             
             $arDespachoControMT->save();                      
             
