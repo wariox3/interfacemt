@@ -1,6 +1,7 @@
 <?php
 prado::using("Application.pages.herramientas.ProcesarPersonas");
 prado::using("Application.pages.herramientas.ProcesarVehiculo");
+prado::using("Application.pages.herramientas.ProcesarGuias");
 prado::using("Application.pages.herramientas.General");
 class Despachos extends TPage {
     public function OnInit($param) {
@@ -38,6 +39,9 @@ class Despachos extends TPage {
                 if($intResultados == 1)
                     $arDespachoControMT->EnvioPersona = 1;
             }
+            else
+                $intResultados = 1;
+            
             if($intResultados == 1) {
                 //Procesar vehiculo          
                 if($arDespachoControMT->EnvioVehiculo == 0) {
@@ -47,6 +51,14 @@ class Despachos extends TPage {
                 }                
             }
             
+            if($intResultados == 1) {
+                //Procesar Guias          
+                if($arDespachoControMT->EnvioGuias == 0) {
+                    $intResultados = $this->enviarGuiasDespacho($cliente, $intOrdDespacho);
+                    if($intResultados == 1)
+                        $arDespachoControMT->EnvioGuias = 1;
+                }                
+            }            
             
             $arDespachoControMT->save();                      
             
@@ -118,6 +130,23 @@ class Despachos extends TPage {
                 if($intResultados == 3) 
                     General::InsertarErrorWS(1, "Personas", $arVehiculo->IdTenedor, "Al insertar aseguradora " . $intIntentos. " intentos, error de conexion con el servidor del ministerio");                            
             }
+            
+            if($intResultados == 1) {
+                $arGuias = new GuiasRecord();
+                $arGuias = GuiasRecord::finder()->FindAllBy_IdDespacho($intOrdDespacho);
+                foreach ($arGuias as $arGuias) {
+                    if($intResultados == 1) {            
+                        $intResultados = 3;
+                        $intIntentos = 0;        
+                        while ($intResultados == 3 && $intIntentos <= $intNumeroIntentos) { 
+                            $intResultados = $objProcesarPersonas->EnviarTercero($cliente, $arGuias->Cuenta);            
+                            $intIntentos++;
+                        }
+                        if($intResultados == 3) 
+                            General::InsertarErrorWS(1, "Personas", $arGuias->Cuenta, "Al insertar remitente guia " . $arGuias->Guia . " " . $intIntentos. " intentos, error de conexion con el servidor del ministerio");                            
+                    }                    
+                }
+            }
         }
 
         
@@ -140,6 +169,14 @@ class Despachos extends TPage {
         
         return $intResultados;
     }
+    
+    public function enviarGuiasDespacho($cliente, $intOrdDespacho) {
+        $objProcesarGuias = new ProcesarGuias();        
+        $arDespacho = new DespachosRecord();
+        $arDespacho = DespachosRecord::finder()->FindByPk($intOrdDespacho);                
+        $intResultados = $objProcesarGuias->EnviarGuias($cliente, $intOrdDespacho);                    
+        return $intResultados;
+    }    
 }
 
 ?>

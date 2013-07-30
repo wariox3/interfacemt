@@ -40,9 +40,11 @@ class VehiculosRecord extends TActiveRecord
 	public $TipoCombustible;
         public $ActualizadoWebServices;
         public $Tenedor; //Array de tipo (Tercero)        
+        public $Propietario; //Array de tipo (Tercero)        
         
         public static $RELATIONS = array(
             'Tenedor' => array(self::BELONGS_TO, 'TercerosRecord', 'IdTenedor'),
+            'Propietario' => array(self::BELONGS_TO, 'TercerosRecord', 'IdPropietario'),
         );
         
 	public static function finder($className=__CLASS__)

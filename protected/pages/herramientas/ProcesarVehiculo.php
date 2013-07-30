@@ -62,7 +62,8 @@ class ProcesarVehiculo {
         $strVehiculoXML = "";
         if($this->validarVehiculo($strPlaca) == true) {
             $arVehiculo = new VehiculosRecord();
-            $arVehiculo = VehiculosRecord::finder()->with_Tenedor()->FindByPk($strPlaca);            
+            $arVehiculo = VehiculosRecord::finder()->with_Tenedor()->with_Propietario()->FindByPk($strPlaca);                        
+            $dateFechaVenceSoat = substr($arVehiculo->VenceSoat, 8, 2) . "/" . substr($arVehiculo->VenceSoat, 5, 2) . "/" . substr($arVehiculo->VenceSoat, 0, 4);
             
             if(count($arVehiculo) > 0) {
                 $strVehiculoXML = "<?xml version='1.0' encoding='ISO-8859-1' ?>
@@ -78,21 +79,24 @@ class ProcesarVehiculo {
                                     <variables>
                                         <NUMNITEMPRESATRANSPORTE>$arConfiguracion->EmpresaWS</NUMNITEMPRESATRANSPORTE>
                                         <NUMPLACA>" . $arVehiculo->IdPlaca  . "</NUMPLACA>
-                                        <CODCONFIGURACIONUNIDADCARGA>55</CODCONFIGURACIONUNIDADCARGA>
+                                        <CODCONFIGURACIONUNIDADCARGA>" . $arVehiculo->VehConfiguracion . "</CODCONFIGURACIONUNIDADCARGA>
+                                        <NUMEJES>" . $arVehiculo->NroEjes . "</NUMEJES>
                                         <CODMARCAVEHICULOCARGA>1</CODMARCAVEHICULOCARGA>
                                         <CODLINEAVEHICULOCARGA>373</CODLINEAVEHICULOCARGA>
-                                        <ANOFABRICACIONVEHICULOCARGA>2010</ANOFABRICACIONVEHICULOCARGA>
+                                        <ANOFABRICACIONVEHICULOCARGA>" . $arVehiculo->Modelo . "</ANOFABRICACIONVEHICULOCARGA>
                                         <CODTIPOCOMBUSTIBLE>1</CODTIPOCOMBUSTIBLE>
-                                        <PESOVEHICULOVACIO>8000</PESOVEHICULOVACIO>
-                                        <CODCOLORVEHICULOCARGA>9439</CODCOLORVEHICULOCARGA>
-                                        <CODTIPOCARROCERIA>0</CODTIPOCARROCERIA>
-                                        <CODTIPOIDPROPIETARIO>C</CODTIPOIDPROPIETARIO>
-                                        <NUMIDPROPIETARIO>51760125</NUMIDPROPIETARIO>
-                                        <CODTIPOIDTENEDOR>C</CODTIPOIDTENEDOR>
-                                        <NUMIDTENEDOR>51760125</NUMIDTENEDOR> 
-                                        <NUMSEGUROSOAT>AT131811151729</NUMSEGUROSOAT> 
-                                        <FECHAVENCIMIENTOSOAT>14/10/2011</FECHAVENCIMIENTOSOAT>
-                                        <NUMNITASEGURADORASOAT>8110191907</NUMNITASEGURADORASOAT>
+                                        <PESOVEHICULOVACIO>" . $arVehiculo->PesoVacio . "</PESOVEHICULOVACIO>
+                                        <CODCOLORVEHICULOCARGA>" . $arVehiculo->IdColor . "</CODCOLORVEHICULOCARGA>
+                                        <CODTIPOCARROCERIA>" . $arVehiculo->IdCarroceria . "</CODTIPOCARROCERIA>
+                                        <CODTIPOIDPROPIETARIO>" . $arVehiculo->Propietario->TpDoc . "</CODTIPOIDPROPIETARIO>
+                                        <NUMIDPROPIETARIO>" . $arVehiculo->Propietario->IDTercero . "</NUMIDPROPIETARIO>
+                                        <CODTIPOIDTENEDOR>" . $arVehiculo->Tenedor->TpDoc . "</CODTIPOIDTENEDOR>
+                                        <NUMIDTENEDOR>" . $arVehiculo->Tenedor->IDTercero . "</NUMIDTENEDOR> 
+                                        <NUMSEGUROSOAT>" . $arVehiculo->Soat . "</NUMSEGUROSOAT> 
+                                        <FECHAVENCIMIENTOSOAT>" . $dateFechaVenceSoat . "</FECHAVENCIMIENTOSOAT>
+                                        <NUMNITASEGURADORASOAT>" . $arVehiculo->IdAseguradora . "</NUMNITASEGURADORASOAT>
+                                        <CAPACIDADUNIDADCARGA>$arVehiculo->Capkilos</CAPACIDADUNIDADCARGA>
+                                        <UNIDADMEDIDACAPACIDAD>1</UNIDADMEDIDACAPACIDAD>
                                     </variables>
                                 </root>";             
             }            

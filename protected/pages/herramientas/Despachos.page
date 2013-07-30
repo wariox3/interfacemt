@@ -45,6 +45,12 @@
                     HeaderText="Veh"
                     HeaderStyle.Width="5px"
                     DataField="EnvioVehiculo"/>                 
+
+                <com:TBoundColumn
+                    ID="ClmEnvioGuias"
+                    HeaderText="Gui"
+                    HeaderStyle.Width="5px"
+                    DataField="EnvioGuias"/>                
                 
                 <com:TTemplateColumn ID="ClmSeleccionar" HeaderText="" ItemStyle.HorizontalAlign="Center" HeaderStyle.Width="20px" >
                     <prop:ItemTemplate>

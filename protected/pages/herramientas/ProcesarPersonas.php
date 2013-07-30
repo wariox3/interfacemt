@@ -81,10 +81,10 @@ class ProcesarPersonas {
                                             $strTerceroXML .= "<PRIMERAPELLIDOIDTERCERO>" . utf8_decode($arTercero->Apellido1) . "</PRIMERAPELLIDOIDTERCERO>
                                                                <SEGUNDOAPELLIDOIDTERCERO>" . utf8_decode($arTercero->Apellido2) . "</SEGUNDOAPELLIDOIDTERCERO>";
                                         }
-                                        if($arTercero->TpDoc == "N") {
-                                            $strTerceroXML .= "<NOMSEDETERCERO>PRINCIPAL</NOMSEDETERCERO>";
-                                        }
                                         $strTerceroXML .= "<CODSEDETERCERO>1</CODSEDETERCERO>";
+                                        //if($arTercero->TpDoc == "N") {
+                                            $strTerceroXML .= "<NOMSEDETERCERO>PRINCIPAL</NOMSEDETERCERO>";
+                                        //}                                        
                                         if($arTercero->Telefono != "") {
                                             $strTerceroXML .= "<NUMTELEFONOCONTACTO>" . $arTercero->Telefono . "</NUMTELEFONOCONTACTO>";
                                         }

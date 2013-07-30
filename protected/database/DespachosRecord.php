@@ -73,7 +73,7 @@ class DespachosRecord extends TActiveRecord
 	}
         
         public function DevDespachosPendientes() {
-            $strSql = "SELECT despachos.OrdDespacho, ManElectronico, IdManifiesto, EnvioPersona, EnvioVehiculo
+            $strSql = "SELECT despachos.OrdDespacho, ManElectronico, IdManifiesto, EnvioPersona, EnvioVehiculo, EnvioGuias
                         FROM despachos
                         LEFT JOIN despachos_control_mt ON despachos.OrdDespacho = despachos_control_mt.OrdDespacho
                         WHERE FhExpedicion >= '2013/07/10' AND IdManifiesto > 0 AND Enviado = 0";
@@ -84,5 +84,6 @@ class DespachosRecord extends TActiveRecord
 class DespachosExtRecord extends DespachosRecord {
     	public $EnvioPersona;
         public $EnvioVehiculo;
+        public $EnvioGuias;
 }
 ?>

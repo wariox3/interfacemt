@@ -57,7 +57,11 @@ class GuiasRecord extends TActiveRecord
 	public $Relacionada;
 	public $EnNovedad;
 	public $FhRegistroEntrega;
-
+        public $ActualizadoWebServices;
+        public $ClienteRemitente; //Array de tipo (Tercero)
+        public static $RELATIONS = array(
+            'ClienteRemitente' => array(self::BELONGS_TO, 'TercerosRecord', 'Cuenta'),            
+        );        
 	public static function finder($className=__CLASS__)
 	{
 		return parent::finder($className);
