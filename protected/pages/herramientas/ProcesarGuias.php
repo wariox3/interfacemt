@@ -19,11 +19,13 @@ class ProcesarGuias {
                         $respuesta = $cliente->__soapCall('AtenderMensajeRNDC', $strXmlGuia);                            
                         $cadena_xml = simplexml_load_string($respuesta);
                         if($cadena_xml->ErrorMSG != "") {
-                            if($cadena_xml->ErrorMSG == "Error al solicitar sesiÃ³n para el servicio. PrepareMethod") {
-                                $intResultado = 3;                                    
-                            }
-                            else {                        
-                                $intResultado = 0;
+                            if($cadena_xml->ErrorMSG == "Error al solicitar sesiÃ³n para el servicio. PrepareMethod") 
+                                $intResultado = 3;                                                                
+                            elseif(substr(strtoupper($cadena_xml->ErrorMSG),0,9) == "DUPLICADO") {
+                                $this->actualizarGuia($arGuias->Guia);
+                                General::InsertarErrorWS(2, "Guias", $arGuias->Guia, utf8_decode($cadena_xml->ErrorMSG));              
+                            }                            
+                            else {                                                        
                                 General::InsertarErrorWS(2, "Guias", $arGuias->Guia, utf8_decode($cadena_xml->ErrorMSG));              
                                 $boolErrorEnGuia = TRUE;
                             }                    
@@ -31,18 +33,18 @@ class ProcesarGuias {
                         else
                             $boolErrorEnGuia = TRUE;
 
-                        if($cadena_xml->ingresoid) {                                                
-                            General::InsertarErrorWS(2, "Guias", $arGuias->Guia, utf8_decode($cadena_xml->ingresoid));
-                            $arGuiaAct = GuiasRecord::finder()->findByPk($arGuias->Guia);
-                            $arGuiaAct->ActualizadoWebServices = 1;
-                            $arGuiaAct->save();                                
+                        if($cadena_xml->ingresoid) {
+                            $this->actualizarGuia($arGuias->Guia);
+                            General::InsertarErrorWS(2, "Guias", $arGuias->Guia, utf8_decode($cadena_xml->ingresoid));                                
                         }                        
                     } catch (Exception $e) {                            
-                        $intResultado = 0;
+                        $boolErrorEnGuia = TRUE;
                         General::InsertarErrorWS(1, "General", "", "Error al enviar parametros guias" . $e);                
                     }                                        
                 }                                                                                       
-            }            
+            }
+            if($boolErrorEnGuia == TRUE)
+                $intResultado = 0;
         }                    
         else
             $intResultado = 1;        
@@ -105,6 +107,12 @@ class ProcesarGuias {
             }                
         }*/               
         return $intResultado;
+    }
+    
+    private function actualizarGuia($intGuia) {
+        $arGuiaAct = GuiasRecord::finder()->findByPk($intGuia);
+        $arGuiaAct->ActualizadoWebServices = 1;
+        $arGuiaAct->save();        
     }
 }
 
