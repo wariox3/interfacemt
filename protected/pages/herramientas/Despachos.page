@@ -50,7 +50,13 @@
                     ID="ClmEnvioGuias"
                     HeaderText="Gui"
                     HeaderStyle.Width="5px"
-                    DataField="EnvioGuias"/>                
+                    DataField="EnvioGuias"/>
+
+                <com:TBoundColumn
+                    ID="ClmEnvioManifiesto"
+                    HeaderText="Man"
+                    HeaderStyle.Width="5px"
+                    DataField="EnvioManifiesto"/>                
                 
                 <com:TTemplateColumn ID="ClmSeleccionar" HeaderText="" ItemStyle.HorizontalAlign="Center" HeaderStyle.Width="20px" >
                     <prop:ItemTemplate>

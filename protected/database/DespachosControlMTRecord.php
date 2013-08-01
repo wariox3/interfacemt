@@ -13,6 +13,7 @@ class DespachosControlMTRecord extends TActiveRecord
 	public $EnvioEmpresa;
 	public $EnvioVehiculo;
         public $EnvioGuias;
+        public $EnvioManifiesto;
         public $Enviado;
 
 	public static function finder($className=__CLASS__)

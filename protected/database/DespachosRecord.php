@@ -65,7 +65,12 @@ class DespachosRecord extends TActiveRecord
 	public $AbonosCE;
 	public $FletesNoCancelados;
 	public $EnviadoMT;
-
+        public $CiudadOrigen; //Array de tipo (Ciudad)
+        public $CiudadDestino; //Array de tipo (Ciudad)        
+        public static $RELATIONS = array(
+            'CiudadOrigen' => array(self::BELONGS_TO, 'CiudadesRecord', 'IdCiudadOrigen'),
+            'CiudadDestino' => array(self::BELONGS_TO, 'CiudadesRecord', 'IdCiudadDestino'),
+        );
         
 	public static function finder($className=__CLASS__)
 	{
@@ -73,7 +78,7 @@ class DespachosRecord extends TActiveRecord
 	}
         
         public function DevDespachosPendientes() {
-            $strSql = "SELECT despachos.OrdDespacho, ManElectronico, IdManifiesto, EnvioPersona, EnvioVehiculo, EnvioGuias
+            $strSql = "SELECT despachos.OrdDespacho, ManElectronico, IdManifiesto, EnvioPersona, EnvioVehiculo, EnvioGuias, EnvioManifiesto
                         FROM despachos
                         LEFT JOIN despachos_control_mt ON despachos.OrdDespacho = despachos_control_mt.OrdDespacho
                         WHERE FhExpedicion >= '2013/07/10' AND IdManifiesto > 0 AND Enviado = 0";
@@ -85,5 +90,6 @@ class DespachosExtRecord extends DespachosRecord {
     	public $EnvioPersona;
         public $EnvioVehiculo;
         public $EnvioGuias;
+        public $EnvioManifiesto;
 }
 ?>

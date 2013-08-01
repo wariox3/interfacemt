@@ -19,10 +19,10 @@ class ProcesarManifiesto {
                             $intResultado = 3;                                                                
                         elseif(substr(strtoupper($cadena_xml->ErrorMSG),0,9) == "DUPLICADO") {
                             $intResultado = 1;
-                            General::InsertarErrorWS(2, "Guias", $arGuias->Guia, utf8_decode($cadena_xml->ErrorMSG));              
+                            General::InsertarErrorWS(2, "Manifiesto", $intOrdDespacho, utf8_decode($cadena_xml->ErrorMSG));              
                         }                            
                         else {                                                        
-                            General::InsertarErrorWS(2, "Guias", $arGuias->Guia, utf8_decode($cadena_xml->ErrorMSG));              
+                            General::InsertarErrorWS(2, "Manifiesto", $intOrdDespacho, utf8_decode($cadena_xml->ErrorMSG));              
                             $intResultado = 0;
                         }                    
                     }
@@ -31,11 +31,11 @@ class ProcesarManifiesto {
 
                     if($cadena_xml->ingresoid) {
                         $intResultado = 1;
-                        General::InsertarErrorWS(2, "Guias", $arGuias->Guia, utf8_decode($cadena_xml->ingresoid));                                
+                        General::InsertarErrorWS(2, "Manifiesto", $intOrdDespacho, utf8_decode($cadena_xml->ingresoid));                                
                     }                        
                 } catch (Exception $e) {                            
                     $intResultado = 0;
-                    General::InsertarErrorWS(1, "General", "", "Error al enviar parametros guias" . $e);                
+                    General::InsertarErrorWS(1, "General", "", "Error al enviar parametros manifiesto" . $e);                
                 }                                        
             }                                                                                       
 
@@ -48,10 +48,13 @@ class ProcesarManifiesto {
         $arConfiguracion = ConfiguracionRecord::finder()->findByPk(1);        
         $strManifiestoXML = "";
         if($this->validarManifiesto($intOrdDespacho) == true) {
-            $arGuia = new GuiasRecord();
-            $arGuia = GuiasRecord::finder()->with_ClienteRemitente()->FindByPk($intGuia);     
-            $dateFechaCargue = substr($arGuia->FhEntradaBodega, 8, 2) . "/" . substr($arGuia->FhEntradaBodega, 5, 2) . "/" . substr($arGuia->FhEntradaBodega, 0, 4);
-            if(count($arGuia) > 0) {
+            $arDespacho = new DespachosRecord();
+            $arDespacho = DespachosRecord::finder()->with_CiudadOrigen()->with_CiudadDestino()->FindByPk($intOrdDespacho); 
+            $arTerceroConductor = new TercerosRecord();
+            $arTerceroConductor = TercerosRecord::finder()->FindByPk($arDespacho->IdConductor);     
+            $arGuias = new GuiasRecord();
+            $arGuias = GuiasRecord::finder()->FindAllBy_IdDespacho_AND_ActualizadoWebServices($intOrdDespacho, 1);
+            if(count($arDespacho) > 0) {
                 $strManifiestoXML = "<?xml version='1.0' encoding='ISO-8859-1' ?>
                                 <root>
                                     <acceso>
@@ -60,29 +63,27 @@ class ProcesarManifiesto {
                                     </acceso>
                                     <solicitud>
                                         <tipo>1</tipo>
-                                        <procesoid>1</procesoid>
+                                        <procesoid>2</procesoid>
                                     </solicitud>
                                     <variables>
                                         <NUMNITEMPRESATRANSPORTE>$arConfiguracion->EmpresaWS</NUMNITEMPRESATRANSPORTE>
-                                        <CONSECUTIVOINFORMACIONVIAJE>0001</CONSECUTIVOINFORMACIONVIAJE>
-                                        <CODIDCONDUCTOR>C</CODIDCONDUCTOR>
-                                        <NUMIDCONDUCTOR>79616565</NUMIDCONDUCTOR>
-                                        <NUMPLACA>WZH111</NUMPLACA>
-                                        <NUMPLACAREMOLQUE>R55555</NUMPLACAREMOLQUE>
-                                        <CODMUNICIPIOORIGENINFOVIAJE>76001000</CODMUNICIPIOORIGENINFOVIAJE>
-                                        <CODMUNICIPIODESTINOINFOVIAJE>11001000</CODMUNICIPIODESTINOINFOVIAJE>
-                                        <PREREMESAS procesoid='44'> 
-                                        <MANPREREMESA>
-                                            <CONSECUTIVOINFORMACIONCARGA>0001</CONSECUTIVOINFORMACIONCARGA>
-                                            </MANPREREMESA>
+                                        <CONSECUTIVOINFORMACIONVIAJE>$arDespacho->IdManifiesto</CONSECUTIVOINFORMACIONVIAJE>
+                                        <CODIDCONDUCTOR>$arTerceroConductor->TpDoc</CODIDCONDUCTOR>
+                                        <NUMIDCONDUCTOR>$arTerceroConductor->IDTercero</NUMIDCONDUCTOR>
+                                        <NUMPLACA>$arDespacho->IdVehiculo</NUMPLACA>                                        
+                                        <CODMUNICIPIOORIGENINFOVIAJE>" . $arDespacho->CiudadOrigen->CodMinTrans . "</CODMUNICIPIOORIGENINFOVIAJE>
+                                        <CODMUNICIPIODESTINOINFOVIAJE>" . $arDespacho->CiudadDestino->CodMinTrans . "</CODMUNICIPIODESTINOINFOVIAJE>
+                                        <PREREMESAS procesoid='44'>";
+                                        foreach ($arGuias as $arGuias) {
+                                            $strManifiestoXML .= " 
                                             <MANPREREMESA>
-                                            < CONSECUTIVOINFORMACIONCARGA >0020</ CONSECUTIVOINFORMACIONCARGA 
-                                            </MANPREREMESA>
-                                            <MANPREREMESA>
-                                            < CONSECUTIVOINFORMACIONCARGA >0035</ CONSECUTIVOINFORMACIONCARGA>
-                                            </MANPREREMESA>
-                                        </PREREMESAS>
-                                        <VALORFLETEPACTADOVIAJE>3200000</VALORFLETEPACTADOVIAJE>
+                                                <CONSECUTIVOINFORMACIONCARGA>" . $arGuias->Guia . "</CONSECUTIVOINFORMACIONCARGA>
+                                            </MANPREREMESA>";                                            
+                                        }
+
+                                        $strManifiestoXML .= 
+                                       "</PREREMESAS>
+                                        <VALORFLETEPACTADOVIAJE>" . $arDespacho->VrFlete . "</VALORFLETEPACTADOVIAJE>
                                     </variables>
                                 </root>";             
             }            
@@ -92,14 +93,20 @@ class ProcesarManifiesto {
     
     private function validarManifiesto ($intOrdDespacho) {
         $intResultado = TRUE;
-        //$arTercero = new TercerosRecord();
-        //$arTercero = TercerosRecord::finder()->with_Ciudad()->FindByPk($strCodigoPersona);        
+        $arDespacho = new DespachosRecord();
+        $arDespacho = DespachosRecord::finder()->FindByPk($intOrdDespacho);         
+        $arTercero = new TercerosRecord();
+        $arTercero = TercerosRecord::finder()->FindByPk($arDespacho->IdConductor);        
+        if(count($arTercero) <= 0) {            
+            $intResultado = FALSE;
+            General::InsertarErrorWS(3, "Manifiestos", $arDespacho->IdConductor, "El conductor debe estar en terceros");            
+        }        
         /*if($arTercero->Telefono != "") {
             if(strlen($arTercero->Telefono) != 7) {
                 $intResultado = FALSE;
                 General::InsertarErrorWS(3, "Personas", $strCodigoPersona, "El numero de telefono debe ser de 7 digitos");
             }                
-        }*/               
+        } */              
         return $intResultado;
     }    
 }

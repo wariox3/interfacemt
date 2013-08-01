@@ -3,6 +3,7 @@ prado::using("Application.pages.herramientas.ProcesarPersonas");
 prado::using("Application.pages.herramientas.ProcesarVehiculo");
 prado::using("Application.pages.herramientas.ProcesarGuias");
 prado::using("Application.pages.herramientas.General");
+prado::using("Application.pages.herramientas.ProcesarManifiesto");
 class Despachos extends TPage {
     public function OnInit($param) {
         parent::OnInit($param);
@@ -59,6 +60,15 @@ class Despachos extends TPage {
                         $arDespachoControMT->EnvioGuias = 1;
                 }                
             }            
+            
+            if($intResultados == 1) {
+                //Procesar Guias          
+                if($arDespachoControMT->EnvioManifiesto == 0) {
+                    $intResultados = $this->enviarManifiestoDespacho($cliente, $intOrdDespacho);
+                    if($intResultados == 1)
+                        $arDespachoControMT->EnvioManifiesto = 1;
+                }                
+            }             
             
             $arDespachoControMT->save();                      
             
@@ -175,6 +185,18 @@ class Despachos extends TPage {
         $arDespacho = new DespachosRecord();
         $arDespacho = DespachosRecord::finder()->FindByPk($intOrdDespacho);                
         $intResultados = $objProcesarGuias->EnviarGuias($cliente, $intOrdDespacho);                    
+        return $intResultados;
+    }    
+    
+    public function enviarManifiestoDespacho($cliente, $intOrdDespacho) {
+        
+        $objProcesarManifiesto = new ProcesarManifiesto();        
+        $arDespacho = new DespachosRecord();
+        $arDespacho = DespachosRecord::finder()->FindByPk($intOrdDespacho);                
+        $intResultados = $objProcesarManifiesto->EnviarManifiesto($cliente, $intOrdDespacho);            
+        if($intResultados == 3) 
+            General::InsertarErrorWS(1, "Manifiesto", $intOrdDespacho, "Al insertar manifiesto error de conexion con el servidor del ministerio");
+        
         return $intResultados;
     }    
 }
