@@ -58,6 +58,7 @@ class GuiasRecord extends TActiveRecord
 	public $EnNovedad;
 	public $FhRegistroEntrega;
         public $ActualizadoWebServices;
+        public $ExpedirRemesaWS;
         public $ClienteRemitente; //Array de tipo (Tercero)
         public static $RELATIONS = array(
             'ClienteRemitente' => array(self::BELONGS_TO, 'TercerosRecord', 'Cuenta'),            

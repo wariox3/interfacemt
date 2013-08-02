@@ -61,6 +61,8 @@ class ProcesarPersonas {
         if($this->validarPersona($strCodigoPersona) == true) {
             $arTercero = new TercerosRecord();
             $arTercero = TercerosRecord::finder()->with_Ciudad()->FindByPk($strCodigoPersona);
+            $arConductor = new ConductoresRecord();
+            $arConductor = ConductoresRecord::finder()->FindByPk($strCodigoPersona);
             if(count($arTercero) > 0) {
                 $strTerceroXML = "<?xml version='1.0' encoding='ISO-8859-1' ?>
                                 <root>
@@ -93,8 +95,15 @@ class ProcesarPersonas {
                                         }
                                         $strTerceroXML .= "
                                         <NOMENCLATURADIRECCION>" . $arTercero->Direccion . "</NOMENCLATURADIRECCION>
-                                        <CODMUNICIPIORNDC>" . $arTercero->Ciudad->CodMinTrans . "</CODMUNICIPIORNDC>
-                                    </variables>
+                                        <CODMUNICIPIORNDC>" . $arTercero->Ciudad->CodMinTrans . "</CODMUNICIPIORNDC>";
+                                        if(count($arConductor) > 0) {
+                                            $dateFechaVenceLic = substr($arConductor->FhVenceLic, 8, 2) . "/" . substr($arConductor->FhVenceLic, 5, 2) . "/" . substr($arConductor->FhVenceLic, 0, 4);
+                                            $strTerceroXML .= "
+                                            <CODCATEGORIALICENCIACONDUCCION>" . $arConductor->Categoria . "</CODCATEGORIALICENCIACONDUCCION>
+                                            <NUMLICENCIACONDUCCION>" . $arConductor->LicenciaConductor . "</NUMLICENCIACONDUCCION>
+                                            <FECHAVENCIMIENTOLICENCIA>" . $dateFechaVenceLic . "</FECHAVENCIMIENTOLICENCIA>";
+                                        }    
+                                        $strTerceroXML .= "</variables>
                                 </root>";
             }
         }

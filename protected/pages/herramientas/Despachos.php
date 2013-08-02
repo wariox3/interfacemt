@@ -4,6 +4,7 @@ prado::using("Application.pages.herramientas.ProcesarVehiculo");
 prado::using("Application.pages.herramientas.ProcesarGuias");
 prado::using("Application.pages.herramientas.General");
 prado::using("Application.pages.herramientas.ProcesarManifiesto");
+prado::using("Application.pages.herramientas.ExpedirRemesas");
 class Despachos extends TPage {
     public function OnInit($param) {
         parent::OnInit($param);
@@ -61,14 +62,21 @@ class Despachos extends TPage {
                 }                
             }            
             
-            if($intResultados == 1) {
-                //Procesar Guias          
+            if($intResultados == 1) {     
                 if($arDespachoControMT->EnvioManifiesto == 0) {
                     $intResultados = $this->enviarManifiestoDespacho($cliente, $intOrdDespacho);
                     if($intResultados == 1)
                         $arDespachoControMT->EnvioManifiesto = 1;
                 }                
             }             
+
+            if($intResultados == 1) {         
+                if($arDespachoControMT->ExpedirRemesas == 0) {
+                    $intResultados = $this->expedirRemesasDespacho($cliente, $intOrdDespacho);
+                    if($intResultados == 1)
+                        $arDespachoControMT->ExpedirRemesas = 1;
+                }                
+            }            
             
             $arDespachoControMT->save();                      
             
@@ -104,62 +112,30 @@ class Despachos extends TPage {
     }
     
     public function enviarPersonasDespacho($cliente, $intOrdDespacho) {
-        $intNumeroIntentos = 80;
         $objProcesarPersonas = new ProcesarPersonas();        
         $arDespacho = new DespachosRecord();
         $arDespacho = DespachosRecord::finder()->FindByPk($intOrdDespacho);        
         $arVehiculo = new VehiculosRecord();
-        $arVehiculo = VehiculosRecord::finder()->findByPk($arDespacho->IdVehiculo);
-        
-        $intResultados = 3;
-        $intIntentos = 0;        
-        while ($intResultados == 3 && $intIntentos <= $intNumeroIntentos) { 
-            $intResultados = $objProcesarPersonas->EnviarTercero($cliente, $arVehiculo->IdTenedor);            
-            $intIntentos++;
-        }
-        if($intResultados == 3) 
-            General::InsertarErrorWS(1, "Personas", $arVehiculo->IdTenedor, "Al insertar tenedor " . $intIntentos. " intentos, error de conexion con el servidor del ministerio");
-
+        $arVehiculo = VehiculosRecord::finder()->findByPk($arDespacho->IdVehiculo);              
+        $intResultados = $objProcesarPersonas->EnviarTercero($cliente, $arVehiculo->IdTenedor);                                
         if($intResultados == 1) {
-            $intResultados = 3;
-            $intIntentos = 0;        
-            while ($intResultados == 3 && $intIntentos <= $intNumeroIntentos) { 
-                $intResultados = $objProcesarPersonas->EnviarTercero($cliente, $arVehiculo->IdPropietario);            
-                $intIntentos++;
-            }
-            if($intResultados == 3) 
-                General::InsertarErrorWS(1, "Personas", $arVehiculo->IdTenedor, "Al insertar propietario " . $intIntentos. " intentos, error de conexion con el servidor del ministerio");            
-            
+            $intResultados = $objProcesarPersonas->EnviarTercero($cliente, $arVehiculo->IdPropietario);            
             if($intResultados == 1) {            
-                $intResultados = 3;
-                $intIntentos = 0;        
-                while ($intResultados == 3 && $intIntentos <= $intNumeroIntentos) { 
-                    $intResultados = $objProcesarPersonas->EnviarTercero($cliente, $arVehiculo->IdAseguradora);            
-                    $intIntentos++;
-                }
-                if($intResultados == 3) 
-                    General::InsertarErrorWS(1, "Personas", $arVehiculo->IdTenedor, "Al insertar aseguradora " . $intIntentos. " intentos, error de conexion con el servidor del ministerio");                            
+                $intResultados = $objProcesarPersonas->EnviarTercero($cliente, $arVehiculo->IdAseguradora);                        
+                if($intResultados == 1) {
+                    $intResultados = $objProcesarPersonas->EnviarTercero($cliente, $arDespacho->IdConductor);
+                    if($intResultados == 1) {
+                         $arGuias = new GuiasRecord();
+                         $arGuias = GuiasRecord::finder()->FindAllBy_IdDespacho($intOrdDespacho);
+                         foreach ($arGuias as $arGuias) {
+                             if($intResultados == 1) {                                         
+                                     $intResultados = $objProcesarPersonas->EnviarTercero($cliente, $arGuias->Cuenta);            
+                             }                    
+                         }
+                     }                    
+                }                
             }
-            
-            if($intResultados == 1) {
-                $arGuias = new GuiasRecord();
-                $arGuias = GuiasRecord::finder()->FindAllBy_IdDespacho($intOrdDespacho);
-                foreach ($arGuias as $arGuias) {
-                    if($intResultados == 1) {            
-                        $intResultados = 3;
-                        $intIntentos = 0;        
-                        while ($intResultados == 3 && $intIntentos <= $intNumeroIntentos) { 
-                            $intResultados = $objProcesarPersonas->EnviarTercero($cliente, $arGuias->Cuenta);            
-                            $intIntentos++;
-                        }
-                        if($intResultados == 3) 
-                            General::InsertarErrorWS(1, "Personas", $arGuias->Cuenta, "Al insertar remitente guia " . $arGuias->Guia . " " . $intIntentos. " intentos, error de conexion con el servidor del ministerio");                            
-                    }                    
-                }
-            }
-        }
-
-        
+        }              
         return $intResultados;
     }
     
@@ -199,6 +175,12 @@ class Despachos extends TPage {
         
         return $intResultados;
     }    
+    
+    public function expedirRemesasDespacho($cliente, $intOrdDespacho) {
+        $objExpedirRemesas = new ExpedirRemesas();                       
+        $intResultados = $objExpedirRemesas->EnviarExpedirRemesas($cliente, $intOrdDespacho);                    
+        return $intResultados;
+    }        
 }
 
 ?>
