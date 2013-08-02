@@ -67,5 +67,15 @@ class GuiasRecord extends TActiveRecord
 	{
 		return parent::finder($className);
 	}
+        
+        public function DevClientesGuias($intOrdDespacho) {
+            $strSql = "SELECT guias.Cuenta
+                        FROM guias                        
+                        WHERE IdDespacho = " . $intOrdDespacho . "
+                        GROUP BY Cuenta";
+            
+            $arGuias = GuiasRecord::finder()->findAllBySql($strSql);            
+            return $arGuias;            
+        }        
 }
 ?>

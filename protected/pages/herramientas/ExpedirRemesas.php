@@ -76,12 +76,27 @@ class ExpedirRemesas {
                                     <variables>
                                         <NUMNITEMPRESATRANSPORTE>$arConfiguracion->EmpresaWS</NUMNITEMPRESATRANSPORTE>
                                         <CONSECUTIVOREMESA>$arGuia->Guia</CONSECUTIVOREMESA>
-                                        <CODOPERACIONTRANSPORTE>P</CODOPERACIONTRANSPORTE>
-                                        <CODTIPOIDREMITENTE>" . $arGuia->ClienteRemitente->TpDoc . "</CODTIPOIDREMITENTE>
-                                        <NUMIDREMITENTE>" . $arGuia->ClienteRemitente->IDTercero . "</NUMIDREMITENTE>
-                                        <CODSEDEREMITENTE>1</CODSEDEREMITENTE>
                                         <CONSECUTIVOINFORMACIONCARGA>$arGuia->Guia</CONSECUTIVOINFORMACIONCARGA> 
+                                        <CODOPERACIONTRANSPORTE>P</CODOPERACIONTRANSPORTE>      
+                                        <CODTIPOEMPAQUE>17</CODTIPOEMPAQUE> 
+                                        <CODNATURALEZACARGA>1</CODNATURALEZACARGA>
+                                        <DESCRIPCIONCORTAPRODUCTO>VARIOS</DESCRIPCIONCORTAPRODUCTO> 
+                                        <MERCANCIAREMESA>009980</MERCANCIAREMESA>
                                         <CANTIDADCARGADA>$arGuia->Unidades</CANTIDADCARGADA>
+                                        <UNIDADMEDIDACAPACIDAD>1</UNIDADMEDIDACAPACIDAD>                                            
+
+                                        <CODTIPOIDPROPIETARIO>" . $arGuia->ClienteRemitente->TpDoc . "</CODTIPOIDPROPIETARIO>
+                                        <NUMIDPROPIETARIO>" . $arGuia->Cuenta . "</NUMIDPROPIETARIO>
+                                        <CODSEDEPROPIETARIO>1</CODSEDEPROPIETARIO>
+
+                                        <CODTIPOIDREMITENTE>" . $arGuia->ClienteRemitente->TpDoc . "</CODTIPOIDREMITENTE>
+                                        <NUMIDREMITENTE>" . $arGuia->Cuenta . "</NUMIDREMITENTE>
+                                        <CODSEDEREMITENTE>1</CODSEDEREMITENTE>
+                                        
+                                        <CODTIPOIDDESTINATARIO>C</CODTIPOIDDESTINATARIO>
+                                        <NUMIDDESTINATARIO>22222</NUMIDDESTINATARIO>
+                                        <CODSEDEDESTINATARIO>1</CODSEDEDESTINATARIO>
+
                                         <DUENOPOLIZA>E</DUENOPOLIZA>
                                         <NUMPOLIZATRANSPORTE>$arInformacionEmpresa->NroPoliza</NUMPOLIZATRANSPORTE>
                                         <FECHAVENCIMIENTOPOLIZACARGA>$dateFechaVencePoliza</FECHAVENCIMIENTOPOLIZACARGA>
@@ -92,6 +107,9 @@ class ExpedirRemesas {
                                         <HORAENTRADACARGUEREMESA>11:15</HORAENTRADACARGUEREMESA>
                                         <FECHASALIDACARGUE>$dateFechaCargue</FECHASALIDACARGUE>
                                         <HORASALIDACARGUEREMESA>11:50</HORASALIDACARGUEREMESA>
+                                        
+                                        <HORASPACTOCARGUE>1</HORASPACTOCARGUE>
+                                        
                                     </variables>
                                 </root>";             
             }            

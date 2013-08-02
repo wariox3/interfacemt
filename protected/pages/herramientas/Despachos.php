@@ -99,6 +99,7 @@ class Despachos extends TPage {
         $arErrores = new ErroresWSRecord();
         $criteria = new TActiveRecordCriteria;            
         $criteria->OrdersBy['codigo'] = 'desc';
+        $criteria->Limit = 20;
         $arErrores = ErroresWSRecord::finder()->FindAll($criteria);
         $this->DGErrores->DataSource = $arErrores;
         $this->DGErrores->DataBind();        
@@ -126,7 +127,7 @@ class Despachos extends TPage {
                     $intResultados = $objProcesarPersonas->EnviarTercero($cliente, $arDespacho->IdConductor);
                     if($intResultados == 1) {
                          $arGuias = new GuiasRecord();
-                         $arGuias = GuiasRecord::finder()->FindAllBy_IdDespacho($intOrdDespacho);
+                         $arGuias = $arGuias->DevClientesGuias($intOrdDespacho);
                          foreach ($arGuias as $arGuias) {
                              if($intResultados == 1) {                                         
                                      $intResultados = $objProcesarPersonas->EnviarTercero($cliente, $arGuias->Cuenta);            
