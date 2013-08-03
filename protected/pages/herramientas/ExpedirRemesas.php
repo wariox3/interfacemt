@@ -7,7 +7,7 @@ class ExpedirRemesas {
         // 1 - Registro insertado
         // 3 - Problema de conexion
         $arGuias = new GuiasRecord();
-        $arGuias = GuiasRecord::finder()->FindAllBy_IdDespacho_AND_ExpedirRemesaWS($intOrdDespacho, 0);
+        $arGuias = GuiasRecord::finder()->FindAllBy_IdDespacho_AND_ExpedirRemesaWS_AND_Guia($intOrdDespacho, 0, 10089045);
         if(count($arGuias) > 0){
             $intResultado = 0;
             $boolErrorExpedirRemesa = FALSE;
@@ -75,8 +75,7 @@ class ExpedirRemesas {
                                     </solicitud>
                                     <variables>
                                         <NUMNITEMPRESATRANSPORTE>$arConfiguracion->EmpresaWS</NUMNITEMPRESATRANSPORTE>
-                                        <CONSECUTIVOREMESA>$arGuia->Guia</CONSECUTIVOREMESA>
-                                        <CONSECUTIVOINFORMACIONCARGA>$arGuia->Guia</CONSECUTIVOINFORMACIONCARGA> 
+                                        <CONSECUTIVOREMESA>1" . $arGuia->Guia . "</CONSECUTIVOREMESA>
                                         <CODOPERACIONTRANSPORTE>P</CODOPERACIONTRANSPORTE>      
                                         <CODTIPOEMPAQUE>17</CODTIPOEMPAQUE> 
                                         <CODNATURALEZACARGA>1</CODNATURALEZACARGA>
@@ -84,7 +83,6 @@ class ExpedirRemesas {
                                         <MERCANCIAREMESA>009980</MERCANCIAREMESA>
                                         <CANTIDADCARGADA>$arGuia->Unidades</CANTIDADCARGADA>
                                         <UNIDADMEDIDACAPACIDAD>1</UNIDADMEDIDACAPACIDAD>                                            
-
                                         <CODTIPOIDPROPIETARIO>" . $arGuia->ClienteRemitente->TpDoc . "</CODTIPOIDPROPIETARIO>
                                         <NUMIDPROPIETARIO>" . $arGuia->Cuenta . "</NUMIDPROPIETARIO>
                                         <CODSEDEPROPIETARIO>1</CODSEDEPROPIETARIO>

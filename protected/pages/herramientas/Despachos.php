@@ -5,6 +5,7 @@ prado::using("Application.pages.herramientas.ProcesarGuias");
 prado::using("Application.pages.herramientas.General");
 prado::using("Application.pages.herramientas.ProcesarManifiesto");
 prado::using("Application.pages.herramientas.ExpedirRemesas");
+prado::using("Application.pages.herramientas.ExpedirManifiesto");
 class Despachos extends TPage {
     public function OnInit($param) {
         parent::OnInit($param);
@@ -75,6 +76,14 @@ class Despachos extends TPage {
                     $intResultados = $this->expedirRemesasDespacho($cliente, $intOrdDespacho);
                     if($intResultados == 1)
                         $arDespachoControMT->ExpedirRemesas = 1;
+                }                
+            }            
+
+            if($intResultados == 1) {         
+                if($arDespachoControMT->ExpedirManifiesto == 0) {
+                    $intResultados = $this->expedirManifiestoDespacho($cliente, $intOrdDespacho);
+                    if($intResultados == 1)
+                        $arDespachoControMT->ExpedirManifiesto = 1;
                 }                
             }            
             
@@ -180,6 +189,12 @@ class Despachos extends TPage {
     public function expedirRemesasDespacho($cliente, $intOrdDespacho) {
         $objExpedirRemesas = new ExpedirRemesas();                       
         $intResultados = $objExpedirRemesas->EnviarExpedirRemesas($cliente, $intOrdDespacho);                    
+        return $intResultados;
+    }        
+    
+    public function expedirManifiestoDespacho($cliente, $intOrdDespacho) {
+        $objExpedirManifiesto = new ExpedirManifiesto();                       
+        $intResultados = $objExpedirManifiesto->EnviarManifiesto($cliente, $intOrdDespacho);                    
         return $intResultados;
     }        
 }
