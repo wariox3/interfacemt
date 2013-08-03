@@ -70,14 +70,14 @@ class ExpedirManifiesto {
                                     <variables>
                                         <NUMNITEMPRESATRANSPORTE>$arConfiguracion->EmpresaWS</NUMNITEMPRESATRANSPORTE>
                                         <NUMMANIFIESTOCARGA>$arDespacho->IdManifiesto</NUMMANIFIESTOCARGA>
-                                        <CONSECUTIVOINFORMACIONVIAJE>$arDespacho->IdManifiesto</CONSECUTIVOINFORMACIONVIAJE>
+                                        
                                         <CODOPERACIONTRANSPORTE>P</CODOPERACIONTRANSPORTE>
                                         <FECHAEXPEDICIONMANIFIESTO>$dateFechaExpedicion</FECHAEXPEDICIONMANIFIESTO>
                                         <CODMUNICIPIOORIGENMANIFIESTO>" . $arDespacho->CiudadOrigen->CodMinTrans . "</CODMUNICIPIOORIGENMANIFIESTO>
                                         <CODMUNICIPIODESTMANIFIESTO>" . $arDespacho->CiudadDestino->CodMinTrans . "</CODMUNICIPIODESTMANIFIESTO>
                                         <CODIDTITULARMANIFIESTO>$arTerceroConductor->TpDoc</CODIDTITULARMANIFIESTO>
                                         <NUMIDTITULARMANIFIESTO>$arTerceroConductor->IDTercero</NUMIDTITULARMANIFIESTO>
-                                        <NUMPLACA>$arDespacho->IdVehiculo</NUMPLACA>                                                                                
+                                        <NUMPLACA>" . utf8_decode($arDespacho->IdVehiculo) . "</NUMPLACA>                                                                                
                                         <CODIDCONDUCTOR>$arTerceroConductor->TpDoc</CODIDCONDUCTOR>
                                         <NUMIDCONDUCTOR>$arTerceroConductor->IDTercero</NUMIDCONDUCTOR>
                                         <VALORFLETEPACTADOVIAJE>" . $arDespacho->VrFlete . "</VALORFLETEPACTADOVIAJE>
@@ -88,13 +88,13 @@ class ExpedirManifiesto {
                                         <CODRESPONSABLEPAGODESCARGUE>E</CODRESPONSABLEPAGODESCARGUE>                                                                                                                        
                                         <REMESASMAN procesoid='43'>";
                                         foreach ($arGuias as $arGuias) {
-                                            $strManifiestoXML .= " 
+                                            $strExpedirManifiestoXML .= " 
                                             <REMESA>
                                                 <CONSECUTIVOREMESA>" . $arGuias->Guia . "</CONSECUTIVOREMESA>
                                             </REMESA>";                                            
                                         }
 
-                                        $strManifiestoXML .= 
+                                        $strExpedirManifiestoXML .= 
                                        "</REMESASMAN>
                                         
                                     </variables>
