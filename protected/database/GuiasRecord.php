@@ -40,6 +40,7 @@ class GuiasRecord extends TActiveRecord
 	public $IdRelEntrega;
 	public $FhDescargada;
 	public $IdFactura2;
+        public $IdFactura3;
 	public $Despachada;
 	public $TpServicio;
 	public $IdTpCtaFlete;
@@ -51,6 +52,7 @@ class GuiasRecord extends TActiveRecord
 	public $GuiFac;
 	public $Facturada;
 	public $Facturada2;
+        public $Facturada3;
 	public $IdUsuario;
 	public $IdPlanillaFactura;
 	public $IdEmpresa;
