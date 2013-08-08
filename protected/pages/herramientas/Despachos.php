@@ -54,22 +54,22 @@ class Despachos extends TPage {
                 }                
             }
             
-            if($intResultados == 1) {
+            /*if($intResultados == 1) {
                 //Procesar Guias          
                 if($arDespachoControMT->EnvioGuias == 0) {
                     $intResultados = $this->enviarGuiasDespacho($cliente, $intOrdDespacho);
                     if($intResultados == 1)
                         $arDespachoControMT->EnvioGuias = 1;
                 }                
-            }            
+            }*/            
             
-            if($intResultados == 1) {     
+            /*if($intResultados == 1) {     
                 if($arDespachoControMT->EnvioManifiesto == 0) {
                     $intResultados = $this->enviarManifiestoDespacho($cliente, $intOrdDespacho);
                     if($intResultados == 1)
                         $arDespachoControMT->EnvioManifiesto = 1;
                 }                
-            }             
+            }*/             
 
             if($intResultados == 1) {         
                 if($arDespachoControMT->ExpedirRemesas == 0) {

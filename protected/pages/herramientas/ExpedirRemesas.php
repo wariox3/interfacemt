@@ -7,12 +7,12 @@ class ExpedirRemesas {
         // 1 - Registro insertado
         // 3 - Problema de conexion
         $arGuias = new GuiasRecord();
-        $arGuias = GuiasRecord::finder()->FindAllBy_IdDespacho_AND_ExpedirRemesaWS_AND_Guia($intOrdDespacho, 0, 10089045);
+        $arGuias = GuiasRecord::finder()->FindAllBy_IdDespacho_AND_ExpedirRemesaWS($intOrdDespacho, 0);
         if(count($arGuias) > 0){
             $intResultado = 0;
             $boolErrorExpedirRemesa = FALSE;
             foreach ($arGuias as $arGuias) {                       
-                $strXmlExpedirRemesa = $this->GenerarXMLExpedirRemesa($arGuias->Guia);
+                $strXmlExpedirRemesa = $this->GenerarXMLExpedirRemesa($arGuias->Guia, $intOrdDespacho);
                 if($strXmlExpedirRemesa != "") {
                     $strXmlExpedirRemesa = array('' => $strXmlExpedirRemesa);                                        
                     try {
@@ -51,17 +51,21 @@ class ExpedirRemesas {
         return $intResultado;
     }
     
-    public function GenerarXMLExpedirRemesa($intGuia) {
+    public function GenerarXMLExpedirRemesa($intGuia, $intOrdDespacho) {
         $arConfiguracion = new ConfiguracionRecord();
         $arConfiguracion = ConfiguracionRecord::finder()->findByPk(1); 
         $arInformacionEmpresa = new InformacionEmpresaRecord();
         $arInformacionEmpresa = InformacionEmpresaRecord::finder()->findByPk(1);
+        $arDespacho = new DespachosRecord();
+        $arDespacho = DespachosRecord::finder()->FindByPk($intOrdDespacho);
         $strExpedirRemesaXML = "";
         if($this->validarExpedirRemesa($intGuia) == true) {
             $arGuia = new GuiasRecord();
             $arGuia = GuiasRecord::finder()->with_ClienteRemitente()->FindByPk($intGuia);     
             $dateFechaVencePoliza = substr($arInformacionEmpresa->VencePoliza, 8, 2) . "/" . substr($arInformacionEmpresa->VencePoliza, 5, 2) . "/" . substr($arInformacionEmpresa->VencePoliza, 0, 4);
             $dateFechaCargue = substr($arGuia->FhEntradaBodega, 8, 2) . "/" . substr($arGuia->FhEntradaBodega, 5, 2) . "/" . substr($arGuia->FhEntradaBodega, 0, 4);
+            $dateFechaPactadaCargue = substr($arDespacho->FhExpedicion, 8, 2) . "/" . substr($arDespacho->FhExpedicion, 5, 2) . "/" . substr($arDespacho->FhExpedicion, 0, 4);
+            $dateFechaPactadaDescargueCargue = substr($arDespacho->FhPagoSaldo, 8, 2) . "/" . substr($arDespacho->FhPagoSaldo, 5, 2) . "/" . substr($arDespacho->FhPagoSaldo, 0, 4);
             if(count($arGuia) > 0) {
                 $strExpedirRemesaXML = "<?xml version='1.0' encoding='ISO-8859-1' ?>
                                 <root>
@@ -75,39 +79,35 @@ class ExpedirRemesas {
                                     </solicitud>
                                     <variables>
                                         <NUMNITEMPRESATRANSPORTE>$arConfiguracion->EmpresaWS</NUMNITEMPRESATRANSPORTE>
-                                        <CONSECUTIVOREMESA>1" . $arGuia->Guia . "</CONSECUTIVOREMESA>
+                                        <CONSECUTIVOREMESA>" . $arGuia->Guia . "</CONSECUTIVOREMESA>
                                         <CODOPERACIONTRANSPORTE>P</CODOPERACIONTRANSPORTE>      
-                                        <CODTIPOEMPAQUE>17</CODTIPOEMPAQUE> 
+                                        <CODTIPOEMPAQUE>0</CODTIPOEMPAQUE> 
                                         <CODNATURALEZACARGA>1</CODNATURALEZACARGA>
-                                        <DESCRIPCIONCORTAPRODUCTO>VARIOS</DESCRIPCIONCORTAPRODUCTO> 
+                                        <DESCRIPCIONCORTAPRODUCTO>PAQUETES VARIOS</DESCRIPCIONCORTAPRODUCTO> 
                                         <MERCANCIAREMESA>009980</MERCANCIAREMESA>
                                         <CANTIDADCARGADA>$arGuia->Unidades</CANTIDADCARGADA>
                                         <UNIDADMEDIDACAPACIDAD>1</UNIDADMEDIDACAPACIDAD>                                            
-                                        <CODTIPOIDPROPIETARIO>" . $arGuia->ClienteRemitente->TpDoc . "</CODTIPOIDPROPIETARIO>
-                                        <NUMIDPROPIETARIO>" . $arGuia->Cuenta . "</NUMIDPROPIETARIO>
-                                        <CODSEDEPROPIETARIO>1</CODSEDEPROPIETARIO>
-
                                         <CODTIPOIDREMITENTE>" . $arGuia->ClienteRemitente->TpDoc . "</CODTIPOIDREMITENTE>
                                         <NUMIDREMITENTE>" . $arGuia->Cuenta . "</NUMIDREMITENTE>
-                                        <CODSEDEREMITENTE>1</CODSEDEREMITENTE>
-                                        
+                                        <CODSEDEREMITENTE>PPAL</CODSEDEREMITENTE>                                        
                                         <CODTIPOIDDESTINATARIO>C</CODTIPOIDDESTINATARIO>
                                         <NUMIDDESTINATARIO>22222</NUMIDDESTINATARIO>
-                                        <CODSEDEDESTINATARIO>1</CODSEDEDESTINATARIO>
-
+                                        <CODSEDEDESTINATARIO>PPAL</CODSEDEDESTINATARIO>                                        
+                                        <CODTIPOIDPROPIETARIO>" . $arGuia->ClienteRemitente->TpDoc . "</CODTIPOIDPROPIETARIO>
+                                        <NUMIDPROPIETARIO>" . $arGuia->Cuenta . "</NUMIDPROPIETARIO>
+                                        <CODSEDEPROPIETARIO>PPAL</CODSEDEPROPIETARIO>                                        
                                         <DUENOPOLIZA>E</DUENOPOLIZA>
                                         <NUMPOLIZATRANSPORTE>$arInformacionEmpresa->NroPoliza</NUMPOLIZATRANSPORTE>
                                         <FECHAVENCIMIENTOPOLIZACARGA>$dateFechaVencePoliza</FECHAVENCIMIENTOPOLIZACARGA>
-                                        <COMPANIASEGURO>$arInformacionEmpresa->NitAseguradora</COMPANIASEGURO>
-                                        <FECHALLEGADACARGUE>$dateFechaCargue</FECHALLEGADACARGUE>
-                                        <HORALLEGADACARGUEREMESA>11:00</HORALLEGADACARGUEREMESA>
-                                        <FECHAENTRADACARGUE>$dateFechaCargue</FECHAENTRADACARGUE>
-                                        <HORAENTRADACARGUEREMESA>11:15</HORAENTRADACARGUEREMESA>
-                                        <FECHASALIDACARGUE>$dateFechaCargue</FECHASALIDACARGUE>
-                                        <HORASALIDACARGUEREMESA>11:50</HORASALIDACARGUEREMESA>
-                                        
-                                        <HORASPACTOCARGUE>1</HORASPACTOCARGUE>
-                                        
+                                        <COMPANIASEGURO>$arInformacionEmpresa->NitAseguradora</COMPANIASEGURO>                                        
+                                        <HORASPACTOCARGUE>24</HORASPACTOCARGUE>
+                                        <MINUTOSPACTOCARGA>00</MINUTOSPACTOCARGA>
+					<FECHACITAPACTADACARGUE>$dateFechaPactadaCargue</FECHACITAPACTADACARGUE>                                        
+                                        <HORACITAPACTADACARGUE>22:00</HORACITAPACTADACARGUE>   
+                                        <HORASPACTODESCARGUE>72</HORASPACTODESCARGUE>
+                                        <MINUTOSPACTODESCARGUE>00</MINUTOSPACTODESCARGUE>
+                                        <FECHACITAPACTADADESCARGUE>$dateFechaPactadaDescargueCargue</FECHACITAPACTADADESCARGUE>
+                                        <HORACITAPACTADADESCARGUEREMESA>08:00</HORACITAPACTADADESCARGUEREMESA>                                        
                                     </variables>
                                 </root>";             
             }            

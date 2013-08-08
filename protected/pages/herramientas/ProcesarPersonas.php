@@ -96,7 +96,7 @@ class ProcesarPersonas {
                                         $strTerceroXML .= "
                                         <NOMENCLATURADIRECCION>" . $arTercero->Direccion . "</NOMENCLATURADIRECCION>
                                         <CODMUNICIPIORNDC>" . $arTercero->Ciudad->CodMinTrans . "</CODMUNICIPIORNDC>";
-                                        if(count($arConductor) > 0) {
+                                        if(count($arConductor) > 0 && $arTercero->TpDoc =="C") {
                                             $dateFechaVenceLic = substr($arConductor->FhVenceLic, 8, 2) . "/" . substr($arConductor->FhVenceLic, 5, 2) . "/" . substr($arConductor->FhVenceLic, 0, 4);
                                             $strTerceroXML .= "
                                             <CODCATEGORIALICENCIACONDUCCION>" . $arConductor->Categoria . "</CODCATEGORIALICENCIACONDUCCION>

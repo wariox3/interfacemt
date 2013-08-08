@@ -62,9 +62,8 @@ class ProcesarVehiculo {
         $strVehiculoXML = "";
         if($this->validarVehiculo($strPlaca) == true) {
             $arVehiculo = new VehiculosRecord();
-            $arVehiculo = VehiculosRecord::finder()->with_Tenedor()->with_Propietario()->FindByPk($strPlaca);                        
-            $dateFechaVenceSoat = substr($arVehiculo->VenceSoat, 8, 2) . "/" . substr($arVehiculo->VenceSoat, 5, 2) . "/" . substr($arVehiculo->VenceSoat, 0, 4);
-            
+            $arVehiculo = VehiculosRecord::finder()->with_Tenedor()->with_Propietario()->FindByPk($strPlaca);    
+            $dateFechaVenceSoat = substr($arVehiculo->VenceSoat, 8, 2) . "/" . substr($arVehiculo->VenceSoat, 5, 2) . "/" . substr($arVehiculo->VenceSoat, 0, 4);            
             if(count($arVehiculo) > 0) {
                 $strVehiculoXML = "<?xml version='1.0' encoding='ISO-8859-1' ?>
                                 <root>
@@ -94,7 +93,7 @@ class ProcesarVehiculo {
                                         <NUMIDTENEDOR>" . $arVehiculo->Tenedor->IDTercero . "</NUMIDTENEDOR> 
                                         <NUMSEGUROSOAT>" . $arVehiculo->Soat . "</NUMSEGUROSOAT> 
                                         <FECHAVENCIMIENTOSOAT>" . $dateFechaVenceSoat . "</FECHAVENCIMIENTOSOAT>
-                                        <NUMNITASEGURADORASOAT>" . $arVehiculo->IdAseguradora . "</NUMNITASEGURADORASOAT>
+                                        <NUMNITASEGURADORASOAT>" . $arVehiculo->IdAseguradora . $this->calcularDV($arVehiculo->IdAseguradora) . "</NUMNITASEGURADORASOAT>
                                         <CAPACIDADUNIDADCARGA>$arVehiculo->Capkilos</CAPACIDADUNIDADCARGA>
                                         <UNIDADMEDIDACAPACIDAD>1</UNIDADMEDIDACAPACIDAD>
                                     </variables>
@@ -116,6 +115,34 @@ class ProcesarVehiculo {
         }*/               
         return $intResultado;
     }
+    
+    function calcularDV($nit) {
+        if (!is_numeric($nit)) {
+            return false;
+        }
+
+        $arr = array(1 => 3, 4 => 17, 7 => 29, 10 => 43, 13 => 59, 2 => 7, 5 => 19,
+            8 => 37, 11 => 47, 14 => 67, 3 => 13, 6 => 23, 9 => 41, 12 => 53, 15 => 71);
+        $x = 0;
+        $y = 0;
+        $z = strlen($nit);
+        $dv = '';
+
+        for ($i = 0; $i < $z; $i++) {
+            $y = substr($nit, $i, 1);
+            $x += ($y * $arr[$z - $i]);
+        }
+
+        $y = $x % 11;
+
+        if ($y > 1) {
+            $dv = 11 - $y;
+            return $dv;
+        } else {
+            $dv = $y;
+            return $dv;
+        }
+    }    
 }
 
 ?>
