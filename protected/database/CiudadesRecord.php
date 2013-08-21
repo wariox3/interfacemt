@@ -12,6 +12,10 @@ class CiudadesRecord extends TActiveRecord
 	public $Distancia;
 	public $IdZona;
 	public $CodMinTrans;
+        public $CodigoDivision;
+	public $CodigoZona;	 	 
+	public $CodigoMunicipio;
+	public $CodigoDepartamento;
 
 	public static function finder($className=__CLASS__)
 	{
