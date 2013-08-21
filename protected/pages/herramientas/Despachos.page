@@ -57,18 +57,6 @@
                     HeaderText="Man"
                     HeaderStyle.Width="5px"
                     DataField="EnvioManifiesto"/>                
-
-                <com:TBoundColumn
-                    ID="ClmExpedirRemesas"
-                    HeaderText="ExpRemesas"
-                    HeaderStyle.Width="5px"
-                    DataField="ExpedirRemesas"/>  
-
-                 <com:TBoundColumn
-                    ID="ClmExpedirManifiesto"
-                    HeaderText="ExpManifiesto"
-                    HeaderStyle.Width="5px"
-                    DataField="ExpedirManifiesto"/>
                 
                 <com:TTemplateColumn ID="ClmSeleccionar" HeaderText="" ItemStyle.HorizontalAlign="Center" HeaderStyle.Width="20px" >
                     <prop:ItemTemplate>

@@ -6,6 +6,11 @@ prado::using("Application.pages.herramientas.General");
 prado::using("Application.pages.herramientas.ProcesarManifiesto");
 prado::using("Application.pages.herramientas.ExpedirRemesas");
 prado::using("Application.pages.herramientas.ExpedirManifiesto");
+
+prado::using("Application.pages.herramientas.EnviarTerceros");
+prado::using("Application.pages.herramientas.EnviarVehiculo");
+prado::using("Application.pages.herramientas.EnviarRemesas");
+
 class Despachos extends TPage {
     public function OnInit($param) {
         parent::OnInit($param);
@@ -18,7 +23,7 @@ class Despachos extends TPage {
     public function procesarDespachoUnico($sender, $param) {
         $registro = $param->Item;   
         $intOrdDespacho = $this->DGDespachos->Datakeys[$registro->ItemIndex];                
-        $this->procesarDespacho($intOrdDespacho);
+        $this->EnviarDespacho($intOrdDespacho);
     }
     
     public function procesarDespacho($intOrdDespacho) {        
@@ -196,7 +201,37 @@ class Despachos extends TPage {
         $objExpedirManifiesto = new ExpedirManifiesto();                       
         $intResultados = $objExpedirManifiesto->EnviarManifiesto($cliente, $intOrdDespacho);                    
         return $intResultados;
-    }        
+    }     
+    
+    public function EnviarDespacho($intOrdDespacho) {
+        $objEnviarTerceros = new EnviarTerceros();
+        $objEnviarVehiculo = new EnviarVehiculo();
+        $objEnviarRemesas = new EnviarRemesas();
+        $arDespacho = new DespachosRecord();
+        $arDespacho = DespachosRecord::finder()->FindByPk($intOrdDespacho);        
+        $arDespachoControMT = new DespachosControlMTRecord();
+        $arDespachoControMT = DespachosControlMTRecord::finder()->findByPk($intOrdDespacho);
+        if($arDespachoControMT->EnvioPersona == 1) {
+            if($arDespachoControMT->EnvioVehiculo == 1) {
+                if($objEnviarRemesas->EnviarRemesasManifiesto($intOrdDespacho)) {
+                    $arDespachoControMT->EnvioGuias = 1;
+                }
+            }
+            else {
+                if($objEnviarVehiculo->EnviarVehiculoManifiesto($intOrdDespacho) == TRUE) {
+                    $arDespachoControMT->EnvioVehiculo = 1;
+                }                   
+            }                           
+        }
+        else {
+            if($objEnviarTerceros->EnviarTercerosManifiesto($intOrdDespacho) == TRUE) {
+                $arDespachoControMT->EnvioPersona = 1;
+            }                
+        }
+        $arDespachoControMT->save();                                                     
+        $this->cargarErrores();
+        $this->cargarDespachos();
+    }
 }
 
 ?>
