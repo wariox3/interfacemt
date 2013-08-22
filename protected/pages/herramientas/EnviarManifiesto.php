@@ -17,6 +17,7 @@ class EnviarManifiesto {
         $boolResultadosEnvio = False;        
         $arDespacho = new DespachosRecord();
         $arDespacho = DespachosRecord::finder()->FindByPk($intOrdDespacho);
+        $strRegistroWS = "";
         if($arDespacho->EnviadoMT == 1){
             $boolResultadosEnvio = true;            
         }            
@@ -34,7 +35,8 @@ class EnviarManifiesto {
                             General::InsertarErrorWS(2, "Manifiesto", $arDespacho->OrdDespacho, utf8_decode($cadena_xml->ErrorMSG));                            
                     }
                     if($cadena_xml->ingresoid) {
-                        General::InsertarErrorWS(2, "Manifiesto", $arDespacho->OrdDespacho, utf8_decode($cadena_xml->ingresoid));                        
+                        General::InsertarErrorWS(2, "Manifiesto", $arDespacho->OrdDespacho, utf8_decode($cadena_xml->ingresoid));
+                        $strRegistroWS = utf8_decode($cadena_xml->ingresoid);
                         $boolResultadosEnvio = true;
                     }                    
                 } catch (Exception $e) {
@@ -45,7 +47,7 @@ class EnviarManifiesto {
                 $boolResultadosEnvio = false; 
             
             if($boolResultadosEnvio == true) {
-                $this->ActualizarManifiesto($intOrdDespacho);
+                $this->ActualizarManifiesto($intOrdDespacho, $strRegistroWS);
             }            
         }              
         return $boolResultadosEnvio;
@@ -65,11 +67,14 @@ class EnviarManifiesto {
         $arTerceroConductor = new TercerosRecord();
         $arTerceroConductor = TercerosRecord::finder()->FindByPk($arDespacho->IdConductor);
         $arGuias = new GuiasRecord();
-        $arGuias = GuiasRecord::finder()->FindAllBy_IdDespacho_AND_ExpedirRemesaWS($intOrdDespacho, 1);
+        $arGuias = GuiasRecord::finder()->FindAllBy_IdDespacho($intOrdDespacho);
         $dateFechaExpedicion = substr($arDespacho->FhExpedicion, 8, 2) . "/" . substr($arDespacho->FhExpedicion, 5, 2) . "/" . substr($arDespacho->FhExpedicion, 0, 4);
         $dateFechaPagoSaldo = substr($arDespacho->FhPagoSaldo, 8, 2) . "/" . substr($arDespacho->FhPagoSaldo, 5, 2) . "/" . substr($arDespacho->FhPagoSaldo, 0, 4);
         if(count($arDespacho) > 0) {
-
+            $strRemesas = "";
+            foreach ($arGuias as $arGuias) {
+                $strRemesas .= "<REMESA><CONSECUTIVOREMESA>$arGuias->Guia</CONSECUTIVOREMESA></REMESA>";
+            }
             $strExpedirManifiestoXML = "<?xml version='1.0' encoding='ISO-8859-1' ?>
                                             <root>
                                              <acceso>
@@ -100,35 +105,21 @@ class EnviarManifiesto {
                                                 <CODRESPONSABLEPAGOCARGUE>E</CODRESPONSABLEPAGOCARGUE>
                                                 <CODRESPONSABLEPAGODESCARGUE>E</CODRESPONSABLEPAGODESCARGUE>
                                                 <OBSERVACIONES>PRUEBA</OBSERVACIONES>
-                                                <CODMUNICIPIOPAGOSALDO>05001000</CODMUNICIPIOPAGOSALDO>
-						<REMESASMAN procesoid='43'>
-							<REMESA>
-								<CONSECUTIVOREMESA>1002</CONSECUTIVOREMESA>
-							</REMESA>
-							<REMESA>
-								<CONSECUTIVOREMESA>1003</CONSECUTIVOREMESA>
-							</REMESA>
-						</REMESASMAN>                                                
+                                                <CODMUNICIPIOPAGOSALDO>05001000</CODMUNICIPIOPAGOSALDO>						
+						<REMESASMAN procesoid='43'>".$strRemesas."</REMESASMAN>                                                    
                                     </variables>
                     </root>";
-                						/*<REMESASMAN procesoid='43'>";
-                                                    foreach ($arGuias as $arGuias) {
-                                                        $strExpedirManifiestoXML .= "
-                                                        <REMESA>
-                                                            <CONSECUTIVOREMESA>" . $arGuias->Guia . "</CONSECUTIVOREMESA>
-                                                        </REMESA>";
-                                                    }
-                                                    $strExpedirManifiestoXML .= "
-						</REMESASMAN>*/
+
             }
         
         return $strExpedirManifiestoXML;
     }  
     
-    public function ActualizarManifiesto($intOrdDespacho) {
+    public function ActualizarManifiesto($intOrdDespacho, $strRegistroWS) {
         $arDespacho = new DespachosRecord();
         $arDespacho = DespachosRecord::finder()->FindByPk($intOrdDespacho);
         $arDespacho->EnviadoMT = 1;
+        $arDespacho->ManElectronico = $strRegistroWS;
         $arDespacho->save();
     }        
 }

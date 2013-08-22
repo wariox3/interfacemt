@@ -1,12 +1,4 @@
 <?php
-prado::using("Application.pages.herramientas.ProcesarPersonas");
-prado::using("Application.pages.herramientas.ProcesarVehiculo");
-prado::using("Application.pages.herramientas.ProcesarGuias");
-prado::using("Application.pages.herramientas.General");
-prado::using("Application.pages.herramientas.ProcesarManifiesto");
-prado::using("Application.pages.herramientas.ExpedirRemesas");
-prado::using("Application.pages.herramientas.ExpedirManifiesto");
-
 prado::using("Application.pages.herramientas.EnviarTerceros");
 prado::using("Application.pages.herramientas.EnviarVehiculo");
 prado::using("Application.pages.herramientas.EnviarRemesas");
@@ -98,17 +90,7 @@ class Despachos extends TPage {
         }
         $this->cargarErrores();
         $this->cargarDespachos();
-    }    
-
-    public function procesarDespachoVarios() {
-        $NumItems = $this->DGDespachos->ItemCount;
-        for ($i = 0; $i < $NumItems; $i++) {
-            if ($this->DGDespachos->Items[$i]->ClmSeleccionar->Check->Value === 'on') {
-                $intOrdDespacho = $this->DGDespachos->Items[$i]->ClmOrdDespacho->Text;
-                $this->procesarDespacho($intOrdDespacho);
-            }
-        }
-    }    
+    }        
             
     public function cargarErrores() {
         $arErrores = new ErroresWSRecord();
@@ -122,87 +104,10 @@ class Despachos extends TPage {
     
     public function cargarDespachos() {
         $arDespachos = new DespachosControlMTRecord();
-        $arDespachos = DespachosControlMTRecord::finder()->FindAll();
+        $arDespachos = DespachosControlMTRecord::finder()->FindAllBy_EnvioManifiesto(0);
         $this->DGDespachos->DataSource = $arDespachos;
         $this->DGDespachos->DataBind();        
-    }
-    
-    public function enviarPersonasDespacho($cliente, $intOrdDespacho) {
-        $objProcesarPersonas = new ProcesarPersonas();        
-        $arDespacho = new DespachosRecord();
-        $arDespacho = DespachosRecord::finder()->FindByPk($intOrdDespacho);        
-        $arVehiculo = new VehiculosRecord();
-        $arVehiculo = VehiculosRecord::finder()->findByPk($arDespacho->IdVehiculo);              
-        $intResultados = $objProcesarPersonas->EnviarTercero($cliente, $arVehiculo->IdTenedor);                                
-        if($intResultados == 1) {
-            $intResultados = $objProcesarPersonas->EnviarTercero($cliente, $arVehiculo->IdPropietario);            
-            if($intResultados == 1) {            
-                $intResultados = $objProcesarPersonas->EnviarTercero($cliente, $arVehiculo->IdAseguradora);                        
-                if($intResultados == 1) {
-                    $intResultados = $objProcesarPersonas->EnviarTercero($cliente, $arDespacho->IdConductor);
-                    if($intResultados == 1) {
-                         $arGuias = new GuiasRecord();
-                         $arGuias = $arGuias->DevClientesGuias($intOrdDespacho);
-                         foreach ($arGuias as $arGuias) {
-                             if($intResultados == 1) {                                         
-                                     $intResultados = $objProcesarPersonas->EnviarTercero($cliente, $arGuias->Cuenta);            
-                             }                    
-                         }
-                     }                    
-                }                
-            }
-        }              
-        return $intResultados;
-    }
-    
-    public function enviarVehiculoDespacho($cliente, $intOrdDespacho) {
-        $intNumeroIntentos = 5;
-        $objProcesarVehiculos = new ProcesarVehiculo();        
-        $arDespacho = new DespachosRecord();
-        $arDespacho = DespachosRecord::finder()->FindByPk($intOrdDespacho);        
-        $intResultados = 3;
-        $intIntentos = 0;        
-        while ($intResultados == 3 && $intIntentos <= $intNumeroIntentos) { 
-            $intResultados = $objProcesarVehiculos->EnviarVehiculo($cliente, $arDespacho->IdVehiculo);            
-            $intIntentos++;
-        }
-        if($intResultados == 3) 
-            General::InsertarErrorWS(1, "Vehiculos", $arDespacho->IdVehiculo, "Al insertar vehiculo " . $intIntentos. " intentos, error de conexion con el servidor del ministerio");
-        
-        return $intResultados;
-    }
-    
-    public function enviarGuiasDespacho($cliente, $intOrdDespacho) {
-        $objProcesarGuias = new ProcesarGuias();        
-        $arDespacho = new DespachosRecord();
-        $arDespacho = DespachosRecord::finder()->FindByPk($intOrdDespacho);                
-        $intResultados = $objProcesarGuias->EnviarGuias($cliente, $intOrdDespacho);                    
-        return $intResultados;
     }    
-    
-    public function enviarManifiestoDespacho($cliente, $intOrdDespacho) {
-        
-        $objProcesarManifiesto = new ProcesarManifiesto();        
-        $arDespacho = new DespachosRecord();
-        $arDespacho = DespachosRecord::finder()->FindByPk($intOrdDespacho);                
-        $intResultados = $objProcesarManifiesto->EnviarManifiesto($cliente, $intOrdDespacho);            
-        if($intResultados == 3) 
-            General::InsertarErrorWS(1, "Manifiesto", $intOrdDespacho, "Al insertar manifiesto error de conexion con el servidor del ministerio");
-        
-        return $intResultados;
-    }    
-    
-    public function expedirRemesasDespacho($cliente, $intOrdDespacho) {
-        $objExpedirRemesas = new ExpedirRemesas();                       
-        $intResultados = $objExpedirRemesas->EnviarExpedirRemesas($cliente, $intOrdDespacho);                    
-        return $intResultados;
-    }        
-    
-    public function expedirManifiestoDespacho($cliente, $intOrdDespacho) {
-        $objExpedirManifiesto = new ExpedirManifiesto();                       
-        $intResultados = $objExpedirManifiesto->EnviarManifiesto($cliente, $intOrdDespacho);                    
-        return $intResultados;
-    }     
     
     public function EnviarDespacho($intOrdDespacho) {
         $objEnviarTerceros = new EnviarTerceros();

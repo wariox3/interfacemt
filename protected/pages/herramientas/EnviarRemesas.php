@@ -33,7 +33,7 @@ class EnviarRemesas {
                     $cadena_xml = simplexml_load_string($respuesta);
                     if($cadena_xml->ErrorMSG != "") {
                         if(substr(strtoupper($cadena_xml->ErrorMSG),0,9) == "DUPLICADO") 
-                            $boolResultadosEnvio = TRUE;                                                    
+                            $boolResultadosEnvio = true;                                                    
                         else
                             General::InsertarErrorWS(2, "Remesas", $arGuia->Guia, utf8_decode($cadena_xml->ErrorMSG));                            
                     }
@@ -70,63 +70,49 @@ class EnviarRemesas {
         $dateFechaCargue = substr($arGuia->FhEntradaBodega, 8, 2) . "/" . substr($arGuia->FhEntradaBodega, 5, 2) . "/" . substr($arGuia->FhEntradaBodega, 0, 4);
         $dateFechaPactadaCargue = substr($arDespacho->FhExpedicion, 8, 2) . "/" . substr($arDespacho->FhExpedicion, 5, 2) . "/" . substr($arDespacho->FhExpedicion, 0, 4);
         $dateFechaPactadaDescargueCargue = substr($arDespacho->FhPagoSaldo, 8, 2) . "/" . substr($arDespacho->FhPagoSaldo, 5, 2) . "/" . substr($arDespacho->FhPagoSaldo, 0, 4);
-
-        $strExpedirRemesaXML = "<?xml version='1.0' encoding='ISO-8859-1' ?>
-                        <root>
-                            <acceso>
-                                <username>$arConfiguracion->UsuarioWS</username>
-                                <password>$arConfiguracion->ClaveWS</password>
-                            </acceso>
-                            <solicitud>
-                                <tipo>1</tipo>
-                                <procesoid>3</procesoid>
-                            </solicitud>
-                            <variables>
-                                <NUMNITEMPRESATRANSPORTE>$arConfiguracion->EmpresaWS</NUMNITEMPRESATRANSPORTE>
-                                <CONSECUTIVOREMESA>" . $arGuia->Guia . "</CONSECUTIVOREMESA>
-                                <CODOPERACIONTRANSPORTE>P</CODOPERACIONTRANSPORTE>      
-                                <CODTIPOEMPAQUE>17</CODTIPOEMPAQUE> 
-                                <CODNATURALEZACARGA>1</CODNATURALEZACARGA>
-                                <DESCRIPCIONCORTAPRODUCTO>PAQUETES VARIOS</DESCRIPCIONCORTAPRODUCTO> 
-                                <MERCANCIAREMESA>009880</MERCANCIAREMESA>
-                                <CANTIDADESTIMADA>$arGuia->KilosReales</CANTIDADESTIMADA>
-                                <CANTIDADCARGADA>$arGuia->KilosReales</CANTIDADCARGADA>
-                                <UNIDADMEDIDACAPACIDAD>1</UNIDADMEDIDACAPACIDAD>                                            
-                                <CODTIPOIDPROPIETARIO>" . $arGuia->ClienteRemitente->TpDoc . "</CODTIPOIDPROPIETARIO>
-                                <NUMIDPROPIETARIO>" . $arGuia->Cuenta . "</NUMIDPROPIETARIO>
-                                <CODSEDEPROPIETARIO>PRINCIPAL</CODSEDEPROPIETARIO>                                 
-                                <CODTIPOIDREMITENTE>" . $arGuia->ClienteRemitente->TpDoc . "</CODTIPOIDREMITENTE>
-                                <NUMIDREMITENTE>" . $arGuia->Cuenta . "</NUMIDREMITENTE>
-                                <CODSEDEREMITENTE>PRINCIPAL</CODSEDEREMITENTE>                                  
-                                <CODTIPOIDDESTINATARIO>C</CODTIPOIDDESTINATARIO>
-                                <NUMIDDESTINATARIO>22222</NUMIDDESTINATARIO>
-                                <CODSEDEDESTINATARIO>PPAL</CODSEDEDESTINATARIO>                                                                               
-                                <DUENOPOLIZA>E</DUENOPOLIZA>
-                                <NUMPOLIZATRANSPORTE>$arInformacionEmpresa->NroPoliza</NUMPOLIZATRANSPORTE>
-                                <FECHAVENCIMIENTOPOLIZACARGA>$dateFechaVencePoliza</FECHAVENCIMIENTOPOLIZACARGA>
-                                <COMPANIASEGURO>$arInformacionEmpresa->NitAseguradora</COMPANIASEGURO>                                        
-                                
-                                <FECHACITAPACTADACARGUE>$dateFechaPactadaCargue</FECHACITAPACTADACARGUE>                                                                        
-                                <HORACITAPACTADACARGUE>10:00</HORACITAPACTADACARGUE>                                   
-                                <FECHALLEGADACARGUE>$dateFechaPactadaCargue</FECHALLEGADACARGUE>
-                                <HORALLEGADACARGUEREMESA>10:10</HORALLEGADACARGUEREMESA> 
-                                <FECHAENTRADACARGUE>$dateFechaPactadaCargue</FECHAENTRADACARGUE>
-                                <HORAENTRADACARGUEREMESA>10:20</HORAENTRADACARGUEREMESA>
-                                <FECHASALIDACARGUE>$dateFechaPactadaCargue</FECHASALIDACARGUE>
-                                <HORASALIDACARGUEREMESA>10:30</HORASALIDACARGUEREMESA>
-
-                                <HORASPACTOCARGUE>1</HORASPACTOCARGUE>
-                                <MINUTOSPACTOCARGA>0</MINUTOSPACTOCARGA>
-                                                                
-                                <HORASPACTODESCARGUE>3</HORASPACTODESCARGUE>
-                                <MINUTOSPACTODESCARGUE>1</MINUTOSPACTODESCARGUE>
-                                
-                                <FECHACITAPACTADADESCARGUE>$dateFechaPactadaCargue</FECHACITAPACTADADESCARGUE>
-                                <HORACITAPACTADADESCARGUEREMESA>15:00</HORACITAPACTADADESCARGUEREMESA>                                        
-                                <OBSERVACIONES>TRANSPORTES VARIOS PAQUETEO</OBSERVACIONES>
-                            </variables>
-                        </root>";               
-            
+        $strExpedirRemesaXML ="<?xml version='1.0' encoding='ISO-8859-1' ?>
+                                <root>
+                                    <acceso>
+                                        <username>entregandomed@0841</username>
+                                        <password>TKLLUVTPHT</password>
+                                    </acceso>
+                                    <solicitud>
+                                        <tipo>1</tipo>
+                                        <procesoid>3</procesoid>
+                                    </solicitud>
+                                    <variables>
+                                        <NUMNITEMPRESATRANSPORTE>8300379211</NUMNITEMPRESATRANSPORTE>
+                                        <CONSECUTIVOREMESA>$arGuia->Guia</CONSECUTIVOREMESA>
+                                        <CODOPERACIONTRANSPORTE>P</CODOPERACIONTRANSPORTE>
+                                        <CODTIPOEMPAQUE>0</CODTIPOEMPAQUE>
+                                        <CODNATURALEZACARGA>1</CODNATURALEZACARGA>                                                  
+                                        <DESCRIPCIONCORTAPRODUCTO>PAQUETES VARIOS</DESCRIPCIONCORTAPRODUCTO>
+                                        <MERCANCIAREMESA>009880</MERCANCIAREMESA>
+                                        <CANTIDADCARGADA>$arGuia->KilosReales</CANTIDADCARGADA>
+                                        <UNIDADMEDIDACAPACIDAD>1</UNIDADMEDIDACAPACIDAD>
+                                        <CODTIPOIDREMITENTE>" . $arGuia->ClienteRemitente->TpDoc . "</CODTIPOIDREMITENTE>
+                                        <NUMIDREMITENTE>$arGuia->Cuenta</NUMIDREMITENTE>
+                                        <CODSEDEREMITENTE>1</CODSEDEREMITENTE>
+                                        <CODTIPOIDDESTINATARIO>C</CODTIPOIDDESTINATARIO>
+                                        <NUMIDDESTINATARIO>22222</NUMIDDESTINATARIO>
+                                        <CODSEDEDESTINATARIO>1</CODSEDEDESTINATARIO>
+                                        <CODTIPOIDPROPIETARIO>" . $arGuia->ClienteRemitente->TpDoc . "</CODTIPOIDPROPIETARIO>
+                                        <NUMIDPROPIETARIO>$arGuia->Cuenta</NUMIDPROPIETARIO>
+                                        <CODSEDEPROPIETARIO>1</CODSEDEPROPIETARIO>
+                                        <DUENOPOLIZA>E</DUENOPOLIZA>
+                                        <NUMPOLIZATRANSPORTE>$arInformacionEmpresa->NroPoliza</NUMPOLIZATRANSPORTE>
+                                        <FECHAVENCIMIENTOPOLIZACARGA>$dateFechaVencePoliza</FECHAVENCIMIENTOPOLIZACARGA>
+                                        <COMPANIASEGURO>$arInformacionEmpresa->NitAseguradora</COMPANIASEGURO>
+                                        <HORASPACTOCARGA>24</HORASPACTOCARGA>
+                                        <MINUTOSPACTOCARGA>00</MINUTOSPACTOCARGA>
+                                        <FECHACITAPACTADACARGUE>21/08/2013</FECHACITAPACTADACARGUE>
+                                        <HORACITAPACTADACARGUE>22:00</HORACITAPACTADACARGUE>
+                                        <HORASPACTODESCARGUE>72</HORASPACTODESCARGUE>
+                                        <MINUTOSPACTODESCARGUE>00</MINUTOSPACTODESCARGUE>
+                                        <FECHACITAPACTADADESCARGUE>25/08/2013</FECHACITAPACTADADESCARGUE>
+                                        <HORACITAPACTADADESCARGUEREMESA>08:00</HORACITAPACTADADESCARGUEREMESA>
+                                    </variables>
+		  		</root>";                       
         return $strExpedirRemesaXML;
     }  
     
