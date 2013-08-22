@@ -21,7 +21,7 @@ class EnviarRemesas {
         $cliente = $objGeneral->CrearConexion();
         $boolResultadosEnvio = False;                
         $arGuia = new GuiasRecord();
-        $arGuia = GuiasRecord::finder()->with_ClienteRemitente()->FindByPk($intGuia);
+        $arGuia = GuiasRecord::finder()->with_ClienteRemitente()->FindByPk($intGuia);        
         if($arGuia->ActualizadoWebServices == 1)
             $boolResultadosEnvio = true;
         else {
@@ -85,33 +85,45 @@ class EnviarRemesas {
                                 <NUMNITEMPRESATRANSPORTE>$arConfiguracion->EmpresaWS</NUMNITEMPRESATRANSPORTE>
                                 <CONSECUTIVOREMESA>" . $arGuia->Guia . "</CONSECUTIVOREMESA>
                                 <CODOPERACIONTRANSPORTE>P</CODOPERACIONTRANSPORTE>      
-                                <CODTIPOEMPAQUE>0</CODTIPOEMPAQUE> 
+                                <CODTIPOEMPAQUE>17</CODTIPOEMPAQUE> 
                                 <CODNATURALEZACARGA>1</CODNATURALEZACARGA>
                                 <DESCRIPCIONCORTAPRODUCTO>PAQUETES VARIOS</DESCRIPCIONCORTAPRODUCTO> 
-                                <MERCANCIAREMESA>009980</MERCANCIAREMESA>
-                                <CANTIDADCARGADA>$arGuia->Unidades</CANTIDADCARGADA>
+                                <MERCANCIAREMESA>009880</MERCANCIAREMESA>
+                                <CANTIDADESTIMADA>$arGuia->KilosReales</CANTIDADESTIMADA>
+                                <CANTIDADCARGADA>$arGuia->KilosReales</CANTIDADCARGADA>
                                 <UNIDADMEDIDACAPACIDAD>1</UNIDADMEDIDACAPACIDAD>                                            
-                                <CODTIPOIDREMITENTE>" . $arGuia->ClienteRemitente->TpDoc . "</CODTIPOIDREMITENTE>
-                                <NUMIDREMITENTE>" . $arGuia->Cuenta . "</NUMIDREMITENTE>
-                                <CODSEDEREMITENTE>PPAL</CODSEDEREMITENTE>                                        
-                                <CODTIPOIDDESTINATARIO>C</CODTIPOIDDESTINATARIO>
-                                <NUMIDDESTINATARIO>22222</NUMIDDESTINATARIO>
-                                <CODSEDEDESTINATARIO>PPAL</CODSEDEDESTINATARIO>                                        
                                 <CODTIPOIDPROPIETARIO>" . $arGuia->ClienteRemitente->TpDoc . "</CODTIPOIDPROPIETARIO>
                                 <NUMIDPROPIETARIO>" . $arGuia->Cuenta . "</NUMIDPROPIETARIO>
-                                <CODSEDEPROPIETARIO>PPAL</CODSEDEPROPIETARIO>                                        
+                                <CODSEDEPROPIETARIO>PRINCIPAL</CODSEDEPROPIETARIO>                                 
+                                <CODTIPOIDREMITENTE>" . $arGuia->ClienteRemitente->TpDoc . "</CODTIPOIDREMITENTE>
+                                <NUMIDREMITENTE>" . $arGuia->Cuenta . "</NUMIDREMITENTE>
+                                <CODSEDEREMITENTE>PRINCIPAL</CODSEDEREMITENTE>                                  
+                                <CODTIPOIDDESTINATARIO>C</CODTIPOIDDESTINATARIO>
+                                <NUMIDDESTINATARIO>22222</NUMIDDESTINATARIO>
+                                <CODSEDEDESTINATARIO>PPAL</CODSEDEDESTINATARIO>                                                                               
                                 <DUENOPOLIZA>E</DUENOPOLIZA>
                                 <NUMPOLIZATRANSPORTE>$arInformacionEmpresa->NroPoliza</NUMPOLIZATRANSPORTE>
                                 <FECHAVENCIMIENTOPOLIZACARGA>$dateFechaVencePoliza</FECHAVENCIMIENTOPOLIZACARGA>
                                 <COMPANIASEGURO>$arInformacionEmpresa->NitAseguradora</COMPANIASEGURO>                                        
-                                <HORASPACTOCARGUE>24</HORASPACTOCARGUE>
-                                <MINUTOSPACTOCARGA>00</MINUTOSPACTOCARGA>
-                                <FECHACITAPACTADACARGUE>$dateFechaPactadaCargue</FECHACITAPACTADACARGUE>                                        
-                                <HORACITAPACTADACARGUE>22:00</HORACITAPACTADACARGUE>   
-                                <HORASPACTODESCARGUE>72</HORASPACTODESCARGUE>
-                                <MINUTOSPACTODESCARGUE>00</MINUTOSPACTODESCARGUE>
-                                <FECHACITAPACTADADESCARGUE>$dateFechaPactadaDescargueCargue</FECHACITAPACTADADESCARGUE>
-                                <HORACITAPACTADADESCARGUEREMESA>08:00</HORACITAPACTADADESCARGUEREMESA>                                        
+                                
+                                <FECHACITAPACTADACARGUE>$dateFechaPactadaCargue</FECHACITAPACTADACARGUE>                                                                        
+                                <HORACITAPACTADACARGUE>10:00</HORACITAPACTADACARGUE>                                   
+                                <FECHALLEGADACARGUE>$dateFechaPactadaCargue</FECHALLEGADACARGUE>
+                                <HORALLEGADACARGUEREMESA>10:10</HORALLEGADACARGUEREMESA> 
+                                <FECHAENTRADACARGUE>$dateFechaPactadaCargue</FECHAENTRADACARGUE>
+                                <HORAENTRADACARGUEREMESA>10:20</HORAENTRADACARGUEREMESA>
+                                <FECHASALIDACARGUE>$dateFechaPactadaCargue</FECHASALIDACARGUE>
+                                <HORASALIDACARGUEREMESA>10:30</HORASALIDACARGUEREMESA>
+
+                                <HORASPACTOCARGUE>1</HORASPACTOCARGUE>
+                                <MINUTOSPACTOCARGA>0</MINUTOSPACTOCARGA>
+                                                                
+                                <HORASPACTODESCARGUE>3</HORASPACTODESCARGUE>
+                                <MINUTOSPACTODESCARGUE>1</MINUTOSPACTODESCARGUE>
+                                
+                                <FECHACITAPACTADADESCARGUE>$dateFechaPactadaCargue</FECHACITAPACTADADESCARGUE>
+                                <HORACITAPACTADADESCARGUEREMESA>15:00</HORACITAPACTADADESCARGUEREMESA>                                        
+                                <OBSERVACIONES>TRANSPORTES VARIOS PAQUETEO</OBSERVACIONES>
                             </variables>
                         </root>";               
             

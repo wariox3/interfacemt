@@ -1,40 +1,40 @@
 <?php
 prado::using("Application.pages.herramientas.General");
 class EnviarManifiesto {
-    public function EnviarVehiculoManifiesto($intOrdDespacho) {
+    public function EnviarManifiestoLocal($intOrdDespacho) {
         $booResultados = TRUE;
         $arDespacho = new DespachosRecord();
         $arDespacho = DespachosRecord::finder()->FindByPk($intOrdDespacho);        
-        if($this->EnviarVehiculoWebServices($arDespacho->IdVehiculo) == false){
+        if($this->EnviarManifiestoWebServices($intOrdDespacho) == false){
             $booResultados = false;
         }  
         return $booResultados;
     }
     
-    public function EnviarVehiculoWebServices($strVehiculo){
+    public function EnviarManifiestoWebServices($intOrdDespacho){
         $objGeneral = new General();                                       
         $cliente = $objGeneral->CrearConexion();
         $boolResultadosEnvio = False;        
-        $arVehiculo = new VehiculosRecord();
-        $arVehiculo = VehiculosRecord::finder()->with_Tenedor()->with_Propietario()->findByPk($strVehiculo);
-        if($arVehiculo->ActualizadoWebServices == 1){
+        $arDespacho = new DespachosRecord();
+        $arDespacho = DespachosRecord::finder()->FindByPk($intOrdDespacho);
+        if($arDespacho->EnviadoMT == 1){
             $boolResultadosEnvio = true;            
         }            
         else {
-            if($this->ValidarDatosVehiculo($arVehiculo) == true) {
-                $strXmlVehiculo = array('' => $this->GenerarXMLVehiculo($arVehiculo));
+            if($this->ValidarDatosManifiesto($arDespacho) == true) {
+                $strXmlManifiesto = array('' => $this->GenerarXMLManifiesto($intOrdDespacho));
                 $respuesta = "";
                 try {
-                    $respuesta = $cliente->__soapCall('AtenderMensajeRNDC', $strXmlVehiculo);
+                    $respuesta = $cliente->__soapCall('AtenderMensajeRNDC', $strXmlManifiesto);
                     $cadena_xml = simplexml_load_string($respuesta);
                     if($cadena_xml->ErrorMSG != "") {
                         if(substr(strtoupper($cadena_xml->ErrorMSG),0,9) == "DUPLICADO") 
                             $boolResultadosEnvio = TRUE;                                                    
                         else
-                            General::InsertarErrorWS(2, "Vehiculos", $arVehiculo->IdPlaca, utf8_decode($cadena_xml->ErrorMSG));                            
+                            General::InsertarErrorWS(2, "Manifiesto", $arDespacho->OrdDespacho, utf8_decode($cadena_xml->ErrorMSG));                            
                     }
                     if($cadena_xml->ingresoid) {
-                        General::InsertarErrorWS(2, "Vehiculos", $arVehiculo->IdPlaca, utf8_decode($cadena_xml->ingresoid));                        
+                        General::InsertarErrorWS(2, "Manifiesto", $arDespacho->OrdDespacho, utf8_decode($cadena_xml->ingresoid));                        
                         $boolResultadosEnvio = true;
                     }                    
                 } catch (Exception $e) {
@@ -45,100 +45,91 @@ class EnviarManifiesto {
                 $boolResultadosEnvio = false; 
             
             if($boolResultadosEnvio == true) {
-                $this->ActualizarVehiculo($strVehiculo);
+                $this->ActualizarManifiesto($intOrdDespacho);
             }            
         }              
         return $boolResultadosEnvio;
     }
     
-    public function ValidarDatosVehiculo ($arVehiculo) {
+    public function ValidarDatosManifiesto ($arDespacho) {
         $intResultadoValidacion = TRUE;
-        $strIdAseguradora = $arVehiculo->IdAseguradora . $this->calcularDV($arVehiculo->IdAseguradora);
-        $arAseguradoras = new AseguradorasRecord();
-        $arAseguradoras = AseguradorasRecord::finder()->FindByPk($strIdAseguradora);
-        if(count($arAseguradoras) <= 0) {
-            $intResultadoValidacion = FALSE;
-            General::InsertarErrorWS(3, "Vehiculos", $arVehiculo->IdPlaca, "La aseguradora de vehiculo no existe en la base de datos del ministerio");
-        }
         return $intResultadoValidacion;            
     }
     
-    public function GenerarXMLVehiculo($arVehiculo) {
+    public function GenerarXMLManifiesto($intOrdDespacho) {
         $arConfiguracion = new ConfiguracionRecord();
-        $arConfiguracion = ConfiguracionRecord::finder()->findByPk(1);        
-        $strVehiculoXML = "";
-        $dateFechaVenceSoat = substr($arVehiculo->VenceSoat, 8, 2) . "/" . substr($arVehiculo->VenceSoat, 5, 2) . "/" . substr($arVehiculo->VenceSoat, 0, 4);            
-        if(count($arVehiculo) > 0) {
-        $strVehiculoXML = "<?xml version='1.0' encoding='ISO-8859-1' ?>
-                        <root>
-                            <acceso>
-                                <username>$arConfiguracion->UsuarioWS</username>
-                                <password>$arConfiguracion->ClaveWS</password>
-                            </acceso>
-                            <solicitud>
-                                <tipo>1</tipo>
-                                <procesoid>12</procesoid>
-                            </solicitud>
-                            <variables>
-                                <NUMNITEMPRESATRANSPORTE>$arConfiguracion->EmpresaWS</NUMNITEMPRESATRANSPORTE>
-                                <NUMPLACA>" . $arVehiculo->IdPlaca  . "</NUMPLACA>
-                                <CODCONFIGURACIONUNIDADCARGA>" . $arVehiculo->VehConfiguracion . "</CODCONFIGURACIONUNIDADCARGA>
-                                <NUMEJES>" . $arVehiculo->NroEjes . "</NUMEJES>
-                                <CODMARCAVEHICULOCARGA>1</CODMARCAVEHICULOCARGA>
-                                <CODLINEAVEHICULOCARGA>373</CODLINEAVEHICULOCARGA>
-                                <ANOFABRICACIONVEHICULOCARGA>" . $arVehiculo->Modelo . "</ANOFABRICACIONVEHICULOCARGA>
-                                <CODTIPOCOMBUSTIBLE>1</CODTIPOCOMBUSTIBLE>
-                                <PESOVEHICULOVACIO>" . $arVehiculo->PesoVacio . "</PESOVEHICULOVACIO>
-                                <CODCOLORVEHICULOCARGA>" . $arVehiculo->IdColor . "</CODCOLORVEHICULOCARGA>
-                                <CODTIPOCARROCERIA>" . $arVehiculo->IdCarroceria . "</CODTIPOCARROCERIA>
-                                <CODTIPOIDPROPIETARIO>" . $arVehiculo->Propietario->TpDoc . "</CODTIPOIDPROPIETARIO>
-                                <NUMIDPROPIETARIO>" . $arVehiculo->Propietario->IDTercero . "</NUMIDPROPIETARIO>
-                                <CODTIPOIDTENEDOR>" . $arVehiculo->Tenedor->TpDoc . "</CODTIPOIDTENEDOR>
-                                <NUMIDTENEDOR>" . $arVehiculo->Tenedor->IDTercero . "</NUMIDTENEDOR> 
-                                <NUMSEGUROSOAT>" . $arVehiculo->Soat . "</NUMSEGUROSOAT> 
-                                <FECHAVENCIMIENTOSOAT>" . $dateFechaVenceSoat . "</FECHAVENCIMIENTOSOAT>
-                                <NUMNITASEGURADORASOAT>" . $arVehiculo->IdAseguradora . $this->calcularDV($arVehiculo->IdAseguradora) . "</NUMNITASEGURADORASOAT>
-                                <CAPACIDADUNIDADCARGA>$arVehiculo->Capkilos</CAPACIDADUNIDADCARGA>
-                                <UNIDADMEDIDACAPACIDAD>1</UNIDADMEDIDACAPACIDAD>
-                            </variables>
-                        </root>";             
-        }              
-        return $strVehiculoXML;
+        $arConfiguracion = ConfiguracionRecord::finder()->findByPk(1);
+        $strExpedirManifiestoXML = "";
+        $arDespacho = new DespachosRecord();
+        $arDespacho = DespachosRecord::finder()->with_CiudadOrigen()->with_CiudadDestino()->FindByPk($intOrdDespacho);
+        $arTerceroConductor = new TercerosRecord();
+        $arTerceroConductor = TercerosRecord::finder()->FindByPk($arDespacho->IdConductor);
+        $arGuias = new GuiasRecord();
+        $arGuias = GuiasRecord::finder()->FindAllBy_IdDespacho_AND_ExpedirRemesaWS($intOrdDespacho, 1);
+        $dateFechaExpedicion = substr($arDespacho->FhExpedicion, 8, 2) . "/" . substr($arDespacho->FhExpedicion, 5, 2) . "/" . substr($arDespacho->FhExpedicion, 0, 4);
+        $dateFechaPagoSaldo = substr($arDespacho->FhPagoSaldo, 8, 2) . "/" . substr($arDespacho->FhPagoSaldo, 5, 2) . "/" . substr($arDespacho->FhPagoSaldo, 0, 4);
+        if(count($arDespacho) > 0) {
+
+            $strExpedirManifiestoXML = "<?xml version='1.0' encoding='ISO-8859-1' ?>
+                                            <root>
+                                             <acceso>
+                                              <username>$arConfiguracion->UsuarioWS</username>
+                                              <password>$arConfiguracion->ClaveWS</password>
+                                             </acceso>
+                                             <solicitud>
+                                              <tipo>1</tipo>
+                                              <procesoid>4</procesoid>
+                                             </solicitud>
+                                             <variables>
+                                                <NUMNITEMPRESATRANSPORTE>$arConfiguracion->EmpresaWS</NUMNITEMPRESATRANSPORTE>
+                                                <NUMMANIFIESTOCARGA>$arDespacho->IdManifiesto</NUMMANIFIESTOCARGA>
+                                                <CODOPERACIONTRANSPORTE>P</CODOPERACIONTRANSPORTE>
+                                                <FECHAEXPEDICIONMANIFIESTO>21/08/2013</FECHAEXPEDICIONMANIFIESTO>
+                                                <CODMUNICIPIOORIGENMANIFIESTO>05001000</CODMUNICIPIOORIGENMANIFIESTO>	
+                                                <CODMUNICIPIODESTINOMANIFIESTO>05237000</CODMUNICIPIODESTINOMANIFIESTO>
+                                                <CODIDTITULARMANIFIESTO>C</CODIDTITULARMANIFIESTO>
+                                                <NUMIDTITULARMANIFIESTO>70143086</NUMIDTITULARMANIFIESTO>
+                                                <NUMPLACA>AAA111</NUMPLACA>
+                                                <CODIDCONDUCTOR>C</CODIDCONDUCTOR>
+                                                <NUMIDCONDUCTOR>70143086</NUMIDCONDUCTOR>
+                                                <VALORFLETEPACTADOVIAJE>100000</VALORFLETEPACTADOVIAJE>
+                                                <RETENCIONFUENTEMANIFIESTO>0</RETENCIONFUENTEMANIFIESTO>
+                                                <RETENCIONICAMANIFIESTOCARGA>0</RETENCIONICAMANIFIESTOCARGA>
+                                                <VALORANTICIPOMANIFIESTO>0</VALORANTICIPOMANIFIESTO>
+                                                <FECHAPAGOSALDOMANIFIESTO>25/08/2013</FECHAPAGOSALDOMANIFIESTO>
+                                                <CODRESPONSABLEPAGOCARGUE>E</CODRESPONSABLEPAGOCARGUE>
+                                                <CODRESPONSABLEPAGODESCARGUE>E</CODRESPONSABLEPAGODESCARGUE>
+                                                <OBSERVACIONES>PRUEBA</OBSERVACIONES>
+                                                <CODMUNICIPIOPAGOSALDO>05001000</CODMUNICIPIOPAGOSALDO>
+						<REMESASMAN procesoid='43'>
+							<REMESA>
+								<CONSECUTIVOREMESA>1002</CONSECUTIVOREMESA>
+							</REMESA>
+							<REMESA>
+								<CONSECUTIVOREMESA>1003</CONSECUTIVOREMESA>
+							</REMESA>
+						</REMESASMAN>                                                
+                                    </variables>
+                    </root>";
+                						/*<REMESASMAN procesoid='43'>";
+                                                    foreach ($arGuias as $arGuias) {
+                                                        $strExpedirManifiestoXML .= "
+                                                        <REMESA>
+                                                            <CONSECUTIVOREMESA>" . $arGuias->Guia . "</CONSECUTIVOREMESA>
+                                                        </REMESA>";
+                                                    }
+                                                    $strExpedirManifiestoXML .= "
+						</REMESASMAN>*/
+            }
+        
+        return $strExpedirManifiestoXML;
     }  
     
-    public function ActualizarVehiculo($strVehiculo) {
-        $arVehiculo = new VehiculosRecord();
-        $arVehiculo = VehiculosRecord::finder()->findByPk($strVehiculo);
-        $arVehiculo->ActualizadoWebServices = 1;
-        $arVehiculo->save();
-    }
-    
-    private function calcularDV($nit) {
-        if (!is_numeric($nit)) {
-            return false;
-        }
-
-        $arr = array(1 => 3, 4 => 17, 7 => 29, 10 => 43, 13 => 59, 2 => 7, 5 => 19,
-            8 => 37, 11 => 47, 14 => 67, 3 => 13, 6 => 23, 9 => 41, 12 => 53, 15 => 71);
-        $x = 0;
-        $y = 0;
-        $z = strlen($nit);
-        $dv = '';
-
-        for ($i = 0; $i < $z; $i++) {
-            $y = substr($nit, $i, 1);
-            $x += ($y * $arr[$z - $i]);
-        }
-
-        $y = $x % 11;
-
-        if ($y > 1) {
-            $dv = 11 - $y;
-            return $dv;
-        } else {
-            $dv = $y;
-            return $dv;
-        }
-    }    
+    public function ActualizarManifiesto($intOrdDespacho) {
+        $arDespacho = new DespachosRecord();
+        $arDespacho = DespachosRecord::finder()->FindByPk($intOrdDespacho);
+        $arDespacho->EnviadoMT = 1;
+        $arDespacho->save();
+    }        
 }
 ?>

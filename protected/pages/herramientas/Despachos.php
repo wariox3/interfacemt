@@ -10,6 +10,7 @@ prado::using("Application.pages.herramientas.ExpedirManifiesto");
 prado::using("Application.pages.herramientas.EnviarTerceros");
 prado::using("Application.pages.herramientas.EnviarVehiculo");
 prado::using("Application.pages.herramientas.EnviarRemesas");
+prado::using("Application.pages.herramientas.EnviarManifiesto");
 
 class Despachos extends TPage {
     public function OnInit($param) {
@@ -120,8 +121,8 @@ class Despachos extends TPage {
     }
     
     public function cargarDespachos() {
-        $arDespachos = new DespachosRecord();
-        $arDespachos = $arDespachos->DevDespachosPendientes();
+        $arDespachos = new DespachosControlMTRecord();
+        $arDespachos = DespachosControlMTRecord::finder()->FindAll();
         $this->DGDespachos->DataSource = $arDespachos;
         $this->DGDespachos->DataBind();        
     }
@@ -207,14 +208,23 @@ class Despachos extends TPage {
         $objEnviarTerceros = new EnviarTerceros();
         $objEnviarVehiculo = new EnviarVehiculo();
         $objEnviarRemesas = new EnviarRemesas();
+        $objEnviarManifiesto = new EnviarManifiesto();
+        
         $arDespacho = new DespachosRecord();
         $arDespacho = DespachosRecord::finder()->FindByPk($intOrdDespacho);        
         $arDespachoControMT = new DespachosControlMTRecord();
         $arDespachoControMT = DespachosControlMTRecord::finder()->findByPk($intOrdDespacho);
         if($arDespachoControMT->EnvioPersona == 1) {
             if($arDespachoControMT->EnvioVehiculo == 1) {
-                if($objEnviarRemesas->EnviarRemesasManifiesto($intOrdDespacho)) {
-                    $arDespachoControMT->EnvioGuias = 1;
+                if($arDespachoControMT->EnvioGuias == 1) {
+                    if($objEnviarManifiesto->EnviarManifiestoLocal($intOrdDespacho) == TRUE) {
+                        $arDespachoControMT->EnvioManifiesto = 1;
+                    }
+                }
+                else {
+                    if($objEnviarRemesas->EnviarRemesasManifiesto($intOrdDespacho) == TRUE) {
+                        $arDespachoControMT->EnvioGuias = 1;
+                    }                    
                 }
             }
             else {

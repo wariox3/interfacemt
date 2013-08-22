@@ -20,19 +20,7 @@
                     ID="ClmOrdDespacho"
                     HeaderText="Orden"
                     HeaderStyle.Width="80px"
-                    DataField="OrdDespacho"/>
-
-                <com:TBoundColumn
-                    ID="ClmManifiesto"
-                    HeaderText="Manifiesto"
-                    HeaderStyle.Width="80px"
-                    DataField="IdManifiesto"/>                
-
-                <com:TBoundColumn
-                    ID="ClmManifiestoElectronico"
-                    HeaderText="Man Electronico"
-                    HeaderStyle.Width="80px"
-                    DataField="ManElectronico"/>                
+                    DataField="OrdDespacho"/>                              
                 
                 <com:TBoundColumn
                     ID="ClmEnvioPersona"
