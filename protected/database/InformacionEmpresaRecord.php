@@ -18,6 +18,8 @@ class InformacionEmpresaRecord extends TActiveRecord
 	public $DireccionTerritorial;
 	public $Email;
 	public $Aseguradora;
+        public $CodRegionalMin;
+        public $CodEmpresaMin;
 
 	public static function finder($className=__CLASS__)
 	{
