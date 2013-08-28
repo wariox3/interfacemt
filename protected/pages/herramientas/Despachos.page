@@ -72,7 +72,7 @@
                 DataKeyField="codigo"
                 AutoGenerateColumns="false"
                 AllowPaging="true"
-                PageSize="5"
+                PageSize="15"
                 PagerStyle.Mode="Numeric"
                 PagerStyle.HorizontalAlign="Right">
 
