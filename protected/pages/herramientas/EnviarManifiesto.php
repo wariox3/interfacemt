@@ -90,8 +90,8 @@ class EnviarManifiesto {
                                                 <NUMMANIFIESTOCARGA>$arDespacho->IdManifiesto</NUMMANIFIESTOCARGA>
                                                 <CODOPERACIONTRANSPORTE>P</CODOPERACIONTRANSPORTE>
                                                 <FECHAEXPEDICIONMANIFIESTO>21/08/2013</FECHAEXPEDICIONMANIFIESTO>
-                                                <CODMUNICIPIOORIGENMANIFIESTO>05001000</CODMUNICIPIOORIGENMANIFIESTO>	
-                                                <CODMUNICIPIODESTINOMANIFIESTO>05237000</CODMUNICIPIODESTINOMANIFIESTO>
+                                                <CODMUNICIPIOORIGENMANIFIESTO>" . $arDespacho->CiudadOrigen->CodMinTrans . "</CODMUNICIPIOORIGENMANIFIESTO>	
+                                                <CODMUNICIPIODESTINOMANIFIESTO>" . $arDespacho->CiudadDestino->CodMinTrans . "</CODMUNICIPIODESTINOMANIFIESTO>
                                                 <CODIDTITULARMANIFIESTO>C</CODIDTITULARMANIFIESTO>
                                                 <NUMIDTITULARMANIFIESTO>70143086</NUMIDTITULARMANIFIESTO>
                                                 <NUMPLACA>AAA111</NUMPLACA>
