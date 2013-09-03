@@ -36,7 +36,11 @@ class Despachos extends TPage {
         else {
             //Procesar personas          
             if($arDespachoControMT->EnvioPersona == 0) {
-                $intResultados = $this->enviarPersonasDespacho($cliente, $intOrdDespacho);
+                $intIntentos = 0;
+                while ($intResultados != 1 && $intIntentos < 30) {
+                    $intResultados = $this->enviarPersonasDespacho($cliente, $intOrdDespacho);    
+                    $intIntentos = $intIntentos + 1;
+                }                               
                 if($intResultados == 1)
                     $arDespachoControMT->EnvioPersona = 1;
             }
@@ -50,24 +54,7 @@ class Despachos extends TPage {
                     if($intResultados == 1)
                         $arDespachoControMT->EnvioVehiculo = 1;
                 }                
-            }
-            
-            /*if($intResultados == 1) {
-                //Procesar Guias          
-                if($arDespachoControMT->EnvioGuias == 0) {
-                    $intResultados = $this->enviarGuiasDespacho($cliente, $intOrdDespacho);
-                    if($intResultados == 1)
-                        $arDespachoControMT->EnvioGuias = 1;
-                }                
-            }*/            
-            
-            /*if($intResultados == 1) {     
-                if($arDespachoControMT->EnvioManifiesto == 0) {
-                    $intResultados = $this->enviarManifiestoDespacho($cliente, $intOrdDespacho);
-                    if($intResultados == 1)
-                        $arDespachoControMT->EnvioManifiesto = 1;
-                }                
-            }*/             
+            }                        
 
             if($intResultados == 1) {         
                 if($arDespachoControMT->ExpedirRemesas == 0) {
@@ -110,6 +97,7 @@ class Despachos extends TPage {
     }    
     
     public function EnviarDespacho($intOrdDespacho) {
+        set_time_limit(60);
         $objEnviarTerceros = new EnviarTerceros();
         $objEnviarVehiculo = new EnviarVehiculo();
         $objEnviarRemesas = new EnviarRemesas();
@@ -139,9 +127,12 @@ class Despachos extends TPage {
             }                           
         }
         else {
-            if($objEnviarTerceros->EnviarTercerosManifiesto($intOrdDespacho) == TRUE) {
-                $arDespachoControMT->EnvioPersona = 1;
+            $boolEnvio = false;
+            while( $boolEnvio == false) {
+                $boolEnvio = $objEnviarTerceros->EnviarTercerosManifiesto($intOrdDespacho);
             }                
+            if($boolEnvio == true)
+                $arDespachoControMT->EnvioPersona = 1;
         }
         $arDespachoControMT->save();                                                     
         $this->cargarErrores();

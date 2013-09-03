@@ -64,6 +64,8 @@ class EnviarManifiesto {
         $strExpedirManifiestoXML = "";
         $arDespacho = new DespachosRecord();
         $arDespacho = DespachosRecord::finder()->with_CiudadOrigen()->with_CiudadDestino()->FindByPk($intOrdDespacho);
+        $arVehiculo = new VehiculosRecord();
+        $arVehiculo = VehiculosRecord::finder()->with_Tenedor()->FindByPk($arDespacho->IdVehiculo);
         $arTerceroConductor = new TercerosRecord();
         $arTerceroConductor = TercerosRecord::finder()->FindByPk($arDespacho->IdConductor);
         $arGuias = new GuiasRecord();
@@ -89,22 +91,22 @@ class EnviarManifiesto {
                                                 <NUMNITEMPRESATRANSPORTE>$arConfiguracion->EmpresaWS</NUMNITEMPRESATRANSPORTE>
                                                 <NUMMANIFIESTOCARGA>$arDespacho->IdManifiesto</NUMMANIFIESTOCARGA>
                                                 <CODOPERACIONTRANSPORTE>P</CODOPERACIONTRANSPORTE>
-                                                <FECHAEXPEDICIONMANIFIESTO>21/08/2013</FECHAEXPEDICIONMANIFIESTO>
+                                                <FECHAEXPEDICIONMANIFIESTO>$dateFechaExpedicion</FECHAEXPEDICIONMANIFIESTO>
                                                 <CODMUNICIPIOORIGENMANIFIESTO>" . $arDespacho->CiudadOrigen->CodMinTrans . "</CODMUNICIPIOORIGENMANIFIESTO>	
                                                 <CODMUNICIPIODESTINOMANIFIESTO>" . $arDespacho->CiudadDestino->CodMinTrans . "</CODMUNICIPIODESTINOMANIFIESTO>
-                                                <CODIDTITULARMANIFIESTO>C</CODIDTITULARMANIFIESTO>
-                                                <NUMIDTITULARMANIFIESTO>70143086</NUMIDTITULARMANIFIESTO>
-                                                <NUMPLACA>AAA111</NUMPLACA>
-                                                <CODIDCONDUCTOR>C</CODIDCONDUCTOR>
-                                                <NUMIDCONDUCTOR>70143086</NUMIDCONDUCTOR>
-                                                <VALORFLETEPACTADOVIAJE>100000</VALORFLETEPACTADOVIAJE>
-                                                <RETENCIONFUENTEMANIFIESTO>0</RETENCIONFUENTEMANIFIESTO>
+                                                <CODIDTITULARMANIFIESTO>" . $arVehiculo->Tenedor->TpDoc . "</CODIDTITULARMANIFIESTO>
+                                                <NUMIDTITULARMANIFIESTO>" . $arVehiculo->IdTenedor . "</NUMIDTITULARMANIFIESTO>
+                                                <NUMPLACA>$arDespacho->IdVehiculo</NUMPLACA>
+                                                <CODIDCONDUCTOR>$arTerceroConductor->TpDoc</CODIDCONDUCTOR>
+                                                <NUMIDCONDUCTOR>$arDespacho->IdConductor</NUMIDCONDUCTOR>
+                                                <VALORFLETEPACTADOVIAJE>$arDespacho->VrFlete</VALORFLETEPACTADOVIAJE>
+                                                <RETENCIONFUENTEMANIFIESTO>$arDespacho->VrDctoRteFte</RETENCIONFUENTEMANIFIESTO>
                                                 <RETENCIONICAMANIFIESTOCARGA>0</RETENCIONICAMANIFIESTOCARGA>
-                                                <VALORANTICIPOMANIFIESTO>0</VALORANTICIPOMANIFIESTO>
-                                                <FECHAPAGOSALDOMANIFIESTO>25/08/2013</FECHAPAGOSALDOMANIFIESTO>
+                                                <VALORANTICIPOMANIFIESTO>$arDespacho->VrAnticipo</VALORANTICIPOMANIFIESTO>
+                                                <FECHAPAGOSALDOMANIFIESTO>$dateFechaPagoSaldo</FECHAPAGOSALDOMANIFIESTO>
                                                 <CODRESPONSABLEPAGOCARGUE>E</CODRESPONSABLEPAGOCARGUE>
                                                 <CODRESPONSABLEPAGODESCARGUE>E</CODRESPONSABLEPAGODESCARGUE>
-                                                <OBSERVACIONES>PRUEBA</OBSERVACIONES>
+                                                <OBSERVACIONES>NADA</OBSERVACIONES>
                                                 <CODMUNICIPIOPAGOSALDO>05001000</CODMUNICIPIOPAGOSALDO>						
 						<REMESASMAN procesoid='43'>".$strRemesas."</REMESASMAN>                                                    
                                     </variables>
