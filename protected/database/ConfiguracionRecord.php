@@ -12,6 +12,10 @@ class ConfiguracionRecord extends TActiveRecord
 	public $UsuarioWS;
 	public $ClaveWS;
         public $EmpresaWS;
+        public $ServidorCorreo;
+        public $UsaAutenticacion;
+        public $UsaSSL;
+        public $Puerto;
 
 	public static function finder($className=__CLASS__)
 	{

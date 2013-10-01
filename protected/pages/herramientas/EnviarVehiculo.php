@@ -24,8 +24,10 @@ class EnviarVehiculo {
             if($this->ValidarDatosVehiculo($arVehiculo) == true) {
                 $strXmlVehiculo = array('' => $this->GenerarXMLVehiculo($arVehiculo));
                 $respuesta = "";
-                try {
+                try {                    
                     $respuesta = $cliente->__soapCall('AtenderMensajeRNDC', $strXmlVehiculo);
+                    //var_dump($cliente->__getFunctions());
+                    
                     $cadena_xml = simplexml_load_string($respuesta);
                     if($cadena_xml->ErrorMSG != "") {
                         if(substr(strtoupper($cadena_xml->ErrorMSG),0,9) == "DUPLICADO") 
