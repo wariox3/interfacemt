@@ -4,23 +4,23 @@ class EnviarManifiesto {
     public function EnviarManifiestoLocal($intOrdDespacho) {
         $booResultados = TRUE;
         $arDespacho = new DespachosRecord();
-        $arDespacho = DespachosRecord::finder()->FindByPk($intOrdDespacho);        
+        $arDespacho = DespachosRecord::finder()->FindByPk($intOrdDespacho);
         if($this->EnviarManifiestoWebServices($intOrdDespacho) == false){
             $booResultados = false;
-        }  
+        }
         return $booResultados;
     }
-    
+
     public function EnviarManifiestoWebServices($intOrdDespacho){
-        $objGeneral = new General();                                       
+        $objGeneral = new General();
         $cliente = $objGeneral->CrearConexion();
-        $boolResultadosEnvio = False;        
+        $boolResultadosEnvio = False;
         $arDespacho = new DespachosRecord();
         $arDespacho = DespachosRecord::finder()->FindByPk($intOrdDespacho);
         $strRegistroWS = "";
         if($arDespacho->EnviadoMT == 1){
-            $boolResultadosEnvio = true;            
-        }            
+            $boolResultadosEnvio = true;
+        }
         else {
             if($this->ValidarDatosManifiesto($arDespacho) == true) {
                 $strXmlManifiesto = array('' => $this->GenerarXMLManifiesto($intOrdDespacho));
@@ -29,35 +29,43 @@ class EnviarManifiesto {
                     $respuesta = $cliente->__soapCall('AtenderMensajeRNDC', $strXmlManifiesto);
                     $cadena_xml = simplexml_load_string($respuesta);
                     if($cadena_xml->ErrorMSG != "") {
-                        if(substr(strtoupper($cadena_xml->ErrorMSG),0,9) == "DUPLICADO") 
-                            $boolResultadosEnvio = TRUE;                                                    
-                        else
-                            General::InsertarErrorWS(2, "Manifiesto", $arDespacho->OrdDespacho, utf8_decode($cadena_xml->ErrorMSG));                            
+                        if(substr(strtoupper($cadena_xml->ErrorMSG),0,9) == "DUPLICADO") {
+                            $boolResultadosEnvio = TRUE;
+                        } elseif(substr($cadena_xml->ErrorMSG, 0, 23 ) == "Error al solicitar sesi") {
+                            $this->EnviarManifiestoWebServices($intOrdDespacho);
+                        }
+                        else {
+                            General::InsertarErrorWS(2, "Manifiesto", $arDespacho->OrdDespacho, utf8_decode($cadena_xml->ErrorMSG));
+                        }                            
                     }
                     if($cadena_xml->ingresoid) {
                         General::InsertarErrorWS(2, "Manifiesto", $arDespacho->OrdDespacho, utf8_decode($cadena_xml->ingresoid));
                         $strRegistroWS = utf8_decode($cadena_xml->ingresoid);
                         $boolResultadosEnvio = true;
-                    }                    
+                    }
                 } catch (Exception $e) {
-                    General::InsertarErrorWS(1, "General", "", "Error al enviar parametros" . $e);
+                    if(substr($e, 0, 19 ) == "SoapFault exception") {
+                        $this->EnviarManifiestoWebServices($intOrdDespacho);
+                    } else {
+                        General::InsertarErrorWS(1, "General", "", "Error al enviar parametros" . $e);
+                    }
                 }
             }
             else
-                $boolResultadosEnvio = false; 
-            
+                $boolResultadosEnvio = false;
+
             if($boolResultadosEnvio == true) {
                 $this->ActualizarManifiesto($intOrdDespacho, $strRegistroWS);
-            }            
-        }              
+            }
+        }
         return $boolResultadosEnvio;
     }
-    
+
     public function ValidarDatosManifiesto ($arDespacho) {
         $intResultadoValidacion = TRUE;
-        return $intResultadoValidacion;            
+        return $intResultadoValidacion;
     }
-    
+
     public function GenerarXMLManifiesto($intOrdDespacho) {
         $arConfiguracion = new ConfiguracionRecord();
         $arConfiguracion = ConfiguracionRecord::finder()->findByPk(1);
@@ -92,7 +100,7 @@ class EnviarManifiesto {
                                                 <NUMMANIFIESTOCARGA>$arDespacho->IdManifiesto</NUMMANIFIESTOCARGA>
                                                 <CODOPERACIONTRANSPORTE>P</CODOPERACIONTRANSPORTE>
                                                 <FECHAEXPEDICIONMANIFIESTO>$dateFechaExpedicion</FECHAEXPEDICIONMANIFIESTO>
-                                                <CODMUNICIPIOORIGENMANIFIESTO>" . $arDespacho->CiudadOrigen->CodMinTrans . "</CODMUNICIPIOORIGENMANIFIESTO>	
+                                                <CODMUNICIPIOORIGENMANIFIESTO>" . $arDespacho->CiudadOrigen->CodMinTrans . "</CODMUNICIPIOORIGENMANIFIESTO>
                                                 <CODMUNICIPIODESTINOMANIFIESTO>" . $arDespacho->CiudadDestino->CodMinTrans . "</CODMUNICIPIODESTINOMANIFIESTO>
                                                 <CODIDTITULARMANIFIESTO>" . $arVehiculo->Tenedor->TpDoc . "</CODIDTITULARMANIFIESTO>
                                                 <NUMIDTITULARMANIFIESTO>" . $arVehiculo->IdTenedor . "</NUMIDTITULARMANIFIESTO>
@@ -107,22 +115,22 @@ class EnviarManifiesto {
                                                 <CODRESPONSABLEPAGOCARGUE>E</CODRESPONSABLEPAGOCARGUE>
                                                 <CODRESPONSABLEPAGODESCARGUE>E</CODRESPONSABLEPAGODESCARGUE>
                                                 <OBSERVACIONES>NADA</OBSERVACIONES>
-                                                <CODMUNICIPIOPAGOSALDO>05001000</CODMUNICIPIOPAGOSALDO>						
-						<REMESASMAN procesoid='43'>".$strRemesas."</REMESASMAN>                                                    
+                                                <CODMUNICIPIOPAGOSALDO>05001000</CODMUNICIPIOPAGOSALDO>
+						<REMESASMAN procesoid='43'>".$strRemesas."</REMESASMAN>
                                     </variables>
                     </root>";
 
             }
-        
+
         return $strExpedirManifiestoXML;
-    }  
-    
+    }
+
     public function ActualizarManifiesto($intOrdDespacho, $strRegistroWS) {
         $arDespacho = new DespachosRecord();
         $arDespacho = DespachosRecord::finder()->FindByPk($intOrdDespacho);
         $arDespacho->EnviadoMT = 1;
         $arDespacho->ManElectronico = $strRegistroWS;
         $arDespacho->save();
-    }        
+    }
 }
 ?>

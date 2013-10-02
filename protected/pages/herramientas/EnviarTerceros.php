@@ -5,9 +5,9 @@ class EnviarTerceros {
         $booResultados = TRUE;
         $arrTercero = array();
         $arDespacho = new DespachosRecord();
-        $arDespacho = DespachosRecord::finder()->FindByPk($intOrdDespacho);        
+        $arDespacho = DespachosRecord::finder()->FindByPk($intOrdDespacho);
         $arVehiculo = new VehiculosRecord();
-        $arVehiculo = VehiculosRecord::finder()->findByPk($arDespacho->IdVehiculo);              
+        $arVehiculo = VehiculosRecord::finder()->findByPk($arDespacho->IdVehiculo);
         $arrTercero[] =  $arVehiculo->IdTenedor;
         $arrTercero[] =  $arVehiculo->IdPropietario;
         $arrTercero[] =  $arVehiculo->IdAseguradora;
@@ -16,20 +16,20 @@ class EnviarTerceros {
         $arGuias = GuiasRecord::finder()->FindAllBySql($strSql);
         foreach ($arGuias as $arGuias) {
             $arrTercero[] = $arGuias->Cuenta;
-        }                    
+        }
         //Procesar array tercero
-        foreach ($arrTercero as $arrTercero) {            
+        foreach ($arrTercero as $arrTercero) {
             if($this->EnviarTerceroWebServices($arrTercero) == false){
                 $booResultados = false;
-            }  
-        }                
+            }
+        }
         return $booResultados;
     }
-    
+
     public function EnviarTerceroWebServices($intTercero){
-        $objGeneral = new General();                                       
+        $objGeneral = new General();
         $cliente = $objGeneral->CrearConexion();
-        $boolResultadosEnvio = False;        
+        $boolResultadosEnvio = False;
         $arTercero = new TercerosRecord();
         $arTercero = TercerosRecord::finder()->with_Ciudad()->FindByPk($intTercero);
         if($arTercero->ActualizadoWebServices == 1)
@@ -42,32 +42,39 @@ class EnviarTerceros {
                     $respuesta = $cliente->__soapCall('AtenderMensajeRNDC', $strXmlTercero);
                     $cadena_xml = simplexml_load_string($respuesta);
                     if($cadena_xml->ErrorMSG != "") {
-                        if(substr(strtoupper($cadena_xml->ErrorMSG),0,9) == "DUPLICADO") 
-                            $boolResultadosEnvio = TRUE;                                                    
-                        else
-                            General::InsertarErrorWS(2, "Personas", $arTercero->IDTercero, utf8_decode($cadena_xml->ErrorMSG));                            
+                        if(substr(strtoupper($cadena_xml->ErrorMSG),0,9) == "DUPLICADO") {
+                            $boolResultadosEnvio = TRUE;
+                        } elseif(substr($cadena_xml->ErrorMSG, 0, 23 ) == "Error al solicitar sesi") {
+                            $this->EnviarTerceroWebServices($intTercero);
+                        }
+                        else {
+                            General::InsertarErrorWS(2, "Personas", $arTercero->IDTercero, utf8_decode($cadena_xml->ErrorMSG));
+                        }                            
                     }
                     if($cadena_xml->ingresoid) {
-                        General::InsertarErrorWS(2, "Personas", $arTercero->IDTercero, utf8_decode($cadena_xml->ingresoid));                        
+                        General::InsertarErrorWS(2, "Personas", $arTercero->IDTercero, utf8_decode($cadena_xml->ingresoid));
                         $boolResultadosEnvio = true;
-                    }                    
+                    }
                 } catch (Exception $e) {
-                    General::InsertarErrorWS(1, "General", "", "Error al enviar parametros" . $e);
+                    if(substr($e, 0, 19 ) == "SoapFault exception") {
+                        $this->EnviarTerceroWebServices($intTercero);
+                    }
+                    else {
+                        General::InsertarErrorWS(1, "General", "", "Error al enviar parametros" . $e);
+                    }
                 }
             }
             else
-                $boolResultadosEnvio = false; 
-            
+                $boolResultadosEnvio = false;
+
             if($boolResultadosEnvio == true) {
                 $this->ActualizarTercero($intTercero);
-            }            
-        }            
-        
+            }
+        }
 
-            
         return $boolResultadosEnvio;
     }
-    
+
     public function ValidarDatosTercero ($arTercero) {
         $intResultadoValidacion = TRUE;
         if($arTercero->Telefono != "") {
@@ -90,16 +97,16 @@ class EnviarTerceros {
             $intResultadoValidacion = FALSE;
             General::InsertarErrorWS(3, "Personas", $arTercero->IDTercero, "El tercero debe tener celular o telefono");
         }
-        return $intResultadoValidacion;            
+        return $intResultadoValidacion;
     }
-    
+
     public function GenerarXMLTercero($arTercero) {
         $arConfiguracion = new ConfiguracionRecord();
         $arConfiguracion = ConfiguracionRecord::finder()->findByPk(1);
         $strTerceroXML = "";
         if(count($arTercero) > 0) {
             $arConductor = new ConductoresRecord();
-            $arConductor = ConductoresRecord::finder()->FindByPk($arTercero->IDTercero);            
+            $arConductor = ConductoresRecord::finder()->FindByPk($arTercero->IDTercero);
             $strTerceroXML = "<?xml version='1.0' encoding='ISO-8859-1' ?>
                             <root>
                                 <acceso>
@@ -119,8 +126,8 @@ class EnviarTerceros {
                                         $strTerceroXML .= "<PRIMERAPELLIDOIDTERCERO>" . utf8_decode($arTercero->Apellido1) . "</PRIMERAPELLIDOIDTERCERO>
                                                            <SEGUNDOAPELLIDOIDTERCERO>" . utf8_decode($arTercero->Apellido2) . "</SEGUNDOAPELLIDOIDTERCERO>";
                                     }
-                                    $strTerceroXML .= "<CODSEDETERCERO>1</CODSEDETERCERO>";                                    
-                                    $strTerceroXML .= "<NOMSEDETERCERO>PRINCIPAL</NOMSEDETERCERO>";                                        
+                                    $strTerceroXML .= "<CODSEDETERCERO>1</CODSEDETERCERO>";
+                                    $strTerceroXML .= "<NOMSEDETERCERO>PRINCIPAL</NOMSEDETERCERO>";
                                     if($arTercero->Telefono != "") {
                                         $strTerceroXML .= "<NUMTELEFONOCONTACTO>" . $arTercero->Telefono . "</NUMTELEFONOCONTACTO>";
                                     }
@@ -136,14 +143,14 @@ class EnviarTerceros {
                                         <CODCATEGORIALICENCIACONDUCCION>" . $arConductor->Categoria . "</CODCATEGORIALICENCIACONDUCCION>
                                         <NUMLICENCIACONDUCCION>" . $arConductor->LicenciaConductor . "</NUMLICENCIACONDUCCION>
                                         <FECHAVENCIMIENTOLICENCIA>" . $dateFechaVenceLic . "</FECHAVENCIMIENTOLICENCIA>";
-                                    }    
+                                    }
                                     $strTerceroXML .= "</variables>
                             </root>";
         }
-        
+
         return $strTerceroXML;
-    }  
-    
+    }
+
     public function ActualizarTercero($intTercero) {
         $arTercero = new TercerosRecord();
         $arTercero = TercerosRecord::finder()->with_Ciudad()->FindByPk($intTercero);

@@ -39,8 +39,13 @@ class EnviarVehiculo {
                         General::InsertarErrorWS(2, "Vehiculos", $arVehiculo->IdPlaca, utf8_decode($cadena_xml->ingresoid));                        
                         $boolResultadosEnvio = true;
                     }                    
-                } catch (Exception $e) {
-                    General::InsertarErrorWS(1, "General", "", "Error al enviar parametros" . $e);
+                } catch (Exception $e) {           
+                    if(substr($e, 0, 19 ) == "SoapFault exception") {
+                        $this->EnviarVehiculoWebServices($strVehiculo);
+                    }
+                    else { 
+                        General::InsertarErrorWS(1, "General", "", "Error al enviar parametros" . $e);
+                    }                                            
                 }
             }
             else

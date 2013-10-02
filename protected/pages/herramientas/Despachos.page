@@ -2,7 +2,6 @@
 <com:TContent ID="Main">
     <div class="hero-unit">
         <com:TForm>            
-            <com:TButton ID="BtnPrueba" OnClick="Prueba" Text="Prueba"/>
             <com:TDataGrid
                 ID="DGDespachos"
                 DataKeyField="OrdDespacho"

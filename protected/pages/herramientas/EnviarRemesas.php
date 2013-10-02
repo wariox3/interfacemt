@@ -32,17 +32,25 @@ class EnviarRemesas {
                     $respuesta = $cliente->__soapCall('AtenderMensajeRNDC', $strXmlGuia);
                     $cadena_xml = simplexml_load_string($respuesta);
                     if($cadena_xml->ErrorMSG != "") {
-                        if(substr(strtoupper($cadena_xml->ErrorMSG),0,9) == "DUPLICADO") 
-                            $boolResultadosEnvio = true;                                                    
-                        else
+                        if(substr(strtoupper($cadena_xml->ErrorMSG),0,9) == "DUPLICADO") {
+                            $boolResultadosEnvio = true;                          
+                        } elseif(substr($cadena_xml->ErrorMSG, 0, 23 ) == "Error al solicitar sesi") {
+                            $this->EnviarGuiaWebServices($intGuia, $arDespacho);
+                        }                        
+                        else {
                             General::InsertarErrorWS(2, "Remesas", $arGuia->Guia, utf8_decode($cadena_xml->ErrorMSG));                            
+                        }
                     }
                     if($cadena_xml->ingresoid) {
                         General::InsertarErrorWS(2, "Remesas", $arGuia->Guia, utf8_decode($cadena_xml->ingresoid));                        
                         $boolResultadosEnvio = true;
                     }                    
                 } catch (Exception $e) {
-                    General::InsertarErrorWS(1, "General", "", "Error al enviar parametros" . $e);
+                    if(substr($e, 0, 19 ) == "SoapFault exception") {
+                        $this->EnviarGuiaWebServices($intGuia, $arDespacho);
+                    } else { 
+                        General::InsertarErrorWS(1, "General", "", "Error al enviar parametros" . $e);
+                    }                                         
                 }
             }
             else
