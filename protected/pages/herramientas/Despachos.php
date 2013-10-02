@@ -97,7 +97,7 @@ class Despachos extends TPage {
     }    
     
     public function EnviarDespacho($intOrdDespacho) {
-        set_time_limit(120);
+        set_time_limit(480);
         $objEnviarTerceros = new EnviarTerceros();
         $objEnviarVehiculo = new EnviarVehiculo();
         $objEnviarRemesas = new EnviarRemesas();
@@ -111,27 +111,37 @@ class Despachos extends TPage {
             if($arDespachoControMT->EnvioVehiculo == 1) {
                 if($arDespachoControMT->EnvioGuias == 1) {
                     if($objEnviarManifiesto->EnviarManifiestoLocal($intOrdDespacho) == TRUE) {
+                        $arDespachoControMT = DespachosControlMTRecord::finder()->findByPk($intOrdDespacho);
                         $arDespachoControMT->EnvioManifiesto = 1;
+                        $arDespachoControMT->save();
                     }
                 }
                 else {
                     if($objEnviarRemesas->EnviarRemesasManifiesto($intOrdDespacho) == TRUE) {
+                        $arDespachoControMT = DespachosControlMTRecord::finder()->findByPk($intOrdDespacho);
                         $arDespachoControMT->EnvioGuias = 1;
+                        $arDespachoControMT->save();
+                        $this->EnviarDespacho($intOrdDespacho);
                     }                    
                 }
             }
             else {
-                if($objEnviarVehiculo->EnviarVehiculoManifiesto($intOrdDespacho) == TRUE) {
+                if($objEnviarVehiculo->EnviarVehiculoManifiesto($intOrdDespacho) == TRUE) {                    
+                    $arDespachoControMT = DespachosControlMTRecord::finder()->findByPk($intOrdDespacho);
                     $arDespachoControMT->EnvioVehiculo = 1;
+                    $arDespachoControMT->save();
+                    $this->EnviarDespacho($intOrdDespacho);                    
                 }                   
             }                           
         }
         else {
             if($objEnviarTerceros->EnviarTercerosManifiesto($intOrdDespacho) == TRUE) {
+                $arDespachoControMT = DespachosControlMTRecord::finder()->findByPk($intOrdDespacho);
                 $arDespachoControMT->EnvioPersona = 1;
+                $arDespachoControMT->save();                                                     
+                $this->EnviarDespacho($intOrdDespacho);
             }           
-        }
-        $arDespachoControMT->save();                                                     
+        }        
         $this->cargarErrores();
         $this->cargarDespachos();
     }
