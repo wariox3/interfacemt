@@ -5,6 +5,7 @@ class General{
         try {
             //$cliente = new SoapClient("http://72.167.52.87:8080/ws/svr008w.dll/wsdl/IBPMServices");
             $cliente = new SoapClient("http://rndcws.mintransporte.gov.co:8080/ws/svr008w.dll/wsdl/IBPMServices");
+            //$cliente = new SoapClient("http://rndcws.mintransporte.gov.co:8080/ws/svr008w.dll/wsdl/IBPMServices");
             //"http://rndcws.mintransporte.gov.co:8080/ws/svr008w.dll"
             return $cliente;
         } catch (Exception $e) {

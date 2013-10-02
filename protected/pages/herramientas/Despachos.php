@@ -5,6 +5,39 @@ prado::using("Application.pages.herramientas.EnviarRemesas");
 prado::using("Application.pages.herramientas.EnviarManifiesto");
 
 class Despachos extends TPage {
+    public function Prueba () {
+        $cliente = new SoapClient("http://rndcws.mintransporte.gov.co:8080/ws/svr008w.dll/wsdl/IBPMServices");
+        $arConfiguracion = new ConfiguracionRecord();
+        $arConfiguracion = ConfiguracionRecord::finder()->findByPk(1);   
+        $strTerceroXML = "<?xml version='1.0' encoding='ISO-8859-1' ?>
+                        <root>
+                            <acceso>
+                                <username>$arConfiguracion->UsuarioWS</username>
+                                <password>$arConfiguracion->ClaveWS</password>
+                            </acceso>
+                            <solicitud>
+                                <tipo>1</tipo>
+                                <procesoid>11</procesoid>
+                            </solicitud>
+                            <variables>
+                                <NUMNITEMPRESATRANSPORTE>$arConfiguracion->EmpresaWS</NUMNITEMPRESATRANSPORTE>
+                                <CODTIPOIDTERCERO>C</CODTIPOIDTERCERO>
+                                <NUMIDTERCERO>70143086</NUMIDTERCERO>
+                                <NOMIDTERCERO>Mario</NOMIDTERCERO>
+                                <PRIMERAPELLIDOIDTERCERO>Estradda</PRIMERAPELLIDOIDTERCERO>
+                                <SEGUNDOAPELLIDOIDTERCERO>Zuluaga</SEGUNDOAPELLIDOIDTERCERO>                                    
+                                <CODSEDETERCERO>1</CODSEDETERCERO>
+                                <NOMSEDETERCERO>PRINCIPAL</NOMSEDETERCERO>                             
+                                <NUMTELEFONOCONTACTO>4445656</NUMTELEFONOCONTACTO>                                                                      
+                                <NOMENCLATURADIRECCION>Cra 4 n 45</NOMENCLATURADIRECCION>
+                                <CODMUNICIPIORNDC>100001000</CODMUNICIPIORNDC>
+                                </variables>
+                        </root>";
+        $strXmlTercero = array('' => $strTerceroXML);            
+        $respuesta = $cliente->__soapCall('AtenderMensajeRNDC', array('' => $strTerceroXML));        
+    }
+
+
     public function OnInit($param) {
         parent::OnInit($param);
         if (!$this->IsPostBack) {
@@ -127,12 +160,9 @@ class Despachos extends TPage {
             }                           
         }
         else {
-            $boolEnvio = false;
-            while( $boolEnvio == false) {
-                $boolEnvio = $objEnviarTerceros->EnviarTercerosManifiesto($intOrdDespacho);
-            }                
-            if($boolEnvio == true)
+            if($objEnviarTerceros->EnviarTercerosManifiesto($intOrdDespacho) == TRUE) {
                 $arDespachoControMT->EnvioPersona = 1;
+            }           
         }
         $arDespachoControMT->save();                                                     
         $this->cargarErrores();

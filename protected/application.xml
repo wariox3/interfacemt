@@ -16,7 +16,7 @@
 
   <modules>
     <module id="db" class="System.Data.TDataSourceConfig">
-     <database ConnectionString="mysql:host=localhost;dbname=bdkl;port=3306" Username="kasten"  Password="aba70143086." />
+     <database ConnectionString="mysql:host=localhost;dbname=bdkl;port=3306" Username="kasten" Password="aba70143086." />
     </module>
     <module class="System.Data.ActiveRecord.TActiveRecordConfig" ConnectionID="db" />
   </modules>

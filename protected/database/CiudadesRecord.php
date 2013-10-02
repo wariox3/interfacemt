@@ -16,7 +16,8 @@ class CiudadesRecord extends TActiveRecord
 	public $CodigoZona;	 	 
 	public $CodigoMunicipio;
 	public $CodigoDepartamento;
-
+        public $Reexpedicion;
+        
 	public static function finder($className=__CLASS__)
 	{
 		return parent::finder($className);
