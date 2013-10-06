@@ -35,6 +35,7 @@ class EnviarRemesas {
                         if(substr(strtoupper($cadena_xml->ErrorMSG),0,9) == "DUPLICADO") {
                             $boolResultadosEnvio = true;                          
                         } elseif(substr($cadena_xml->ErrorMSG, 0, 23 ) == "Error al solicitar sesi") {
+                            sleep(4);
                             $this->EnviarGuiaWebServices($intGuia, $arDespacho);
                         }                        
                         else {
