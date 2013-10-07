@@ -45,6 +45,7 @@ class EnviarTerceros {
                         if(substr(strtoupper($cadena_xml->ErrorMSG),0,9) == "DUPLICADO") {
                             $boolResultadosEnvio = TRUE;
                         } elseif(substr($cadena_xml->ErrorMSG, 0, 23 ) == "Error al solicitar sesi") {
+                            sleep(4);
                             $this->EnviarTerceroWebServices($intTercero);
                         }
                         else {
@@ -57,6 +58,7 @@ class EnviarTerceros {
                     }
                 } catch (Exception $e) {
                     if(substr($e, 0, 19 ) == "SoapFault exception") {
+                        sleep(4);
                         $this->EnviarTerceroWebServices($intTercero);
                     }
                     else {

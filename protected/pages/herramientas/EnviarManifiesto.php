@@ -32,6 +32,7 @@ class EnviarManifiesto {
                         if(substr(strtoupper($cadena_xml->ErrorMSG),0,9) == "DUPLICADO") {
                             $boolResultadosEnvio = TRUE;
                         } elseif(substr($cadena_xml->ErrorMSG, 0, 23 ) == "Error al solicitar sesi") {
+                            sleep(4);
                             $this->EnviarManifiestoWebServices($intOrdDespacho);
                         }
                         else {
@@ -45,6 +46,7 @@ class EnviarManifiesto {
                     }
                 } catch (Exception $e) {
                     if(substr($e, 0, 19 ) == "SoapFault exception") {
+                        sleep(4);
                         $this->EnviarManifiestoWebServices($intOrdDespacho);
                     } else {
                         General::InsertarErrorWS(1, "General", "", "Error al enviar parametros" . $e);

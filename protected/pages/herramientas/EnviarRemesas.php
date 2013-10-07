@@ -48,6 +48,7 @@ class EnviarRemesas {
                     }                    
                 } catch (Exception $e) {
                     if(substr($e, 0, 19 ) == "SoapFault exception") {
+                        sleep(4);
                         $this->EnviarGuiaWebServices($intGuia, $arDespacho);
                     } else { 
                         General::InsertarErrorWS(1, "General", "", "Error al enviar parametros" . $e);
