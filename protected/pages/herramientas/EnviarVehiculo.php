@@ -30,10 +30,15 @@ class EnviarVehiculo {
                     
                     $cadena_xml = simplexml_load_string($respuesta);
                     if($cadena_xml->ErrorMSG != "") {
-                        if(substr(strtoupper($cadena_xml->ErrorMSG),0,9) == "DUPLICADO") 
-                            $boolResultadosEnvio = TRUE;                                                    
-                        else
+                        if(substr(strtoupper($cadena_xml->ErrorMSG),0,9) == "DUPLICADO") {
+                            $boolResultadosEnvio = TRUE;       
+                        } elseif(substr($cadena_xml->ErrorMSG, 0, 23 ) == "Error al solicitar sesi") {
+                            sleep(4);
+                            $this->EnviarVehiculoWebServices($strVehiculo);
+                        }
+                        else {
                             General::InsertarErrorWS(2, "Vehiculos", $arVehiculo->IdPlaca, utf8_decode($cadena_xml->ErrorMSG));                            
+                        }
                     }
                     if($cadena_xml->ingresoid) {
                         General::InsertarErrorWS(2, "Vehiculos", $arVehiculo->IdPlaca, utf8_decode($cadena_xml->ingresoid));                        
@@ -41,6 +46,7 @@ class EnviarVehiculo {
                     }                    
                 } catch (Exception $e) {           
                     if(substr($e, 0, 19 ) == "SoapFault exception") {
+                        sleep(4);
                         $this->EnviarVehiculoWebServices($strVehiculo);
                     }
                     else { 

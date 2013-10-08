@@ -121,7 +121,6 @@ class Despachos extends TPage {
                         $arDespachoControMT = DespachosControlMTRecord::finder()->findByPk($intOrdDespacho);
                         $arDespachoControMT->EnvioGuias = 1;
                         $arDespachoControMT->save();
-                        $this->EnviarDespacho($intOrdDespacho);
                     }                    
                 }
             }
@@ -130,7 +129,6 @@ class Despachos extends TPage {
                     $arDespachoControMT = DespachosControlMTRecord::finder()->findByPk($intOrdDespacho);
                     $arDespachoControMT->EnvioVehiculo = 1;
                     $arDespachoControMT->save();
-                    $this->EnviarDespacho($intOrdDespacho);                    
                 }                   
             }                           
         }
@@ -138,8 +136,7 @@ class Despachos extends TPage {
             if($objEnviarTerceros->EnviarTercerosManifiesto($intOrdDespacho) == TRUE) {
                 $arDespachoControMT = DespachosControlMTRecord::finder()->findByPk($intOrdDespacho);
                 $arDespachoControMT->EnvioPersona = 1;
-                $arDespachoControMT->save();                                                     
-                $this->EnviarDespacho($intOrdDespacho);
+                $arDespachoControMT->save();                                                                     
             }           
         }        
         $this->cargarErrores();
