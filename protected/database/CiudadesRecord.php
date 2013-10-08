@@ -16,9 +16,6 @@ class CiudadesRecord extends TActiveRecord
 	public $CodigoZona;	 	 
 	public $CodigoMunicipio;
 	public $CodigoDepartamento;
-        public $CuentaFlete;
-        public $CuentaManejo;
-        public $CuentaCartera;
         public $Reexpedicion;
         
 	public static function finder($className=__CLASS__)
