@@ -101,7 +101,7 @@ class Despachos extends TPage {
     }    
     
     public function EnviarDespacho($intOrdDespacho) {
-        set_time_limit(10);
+        set_time_limit(0);
         $objEnviarTerceros = new EnviarTerceros();
         $objEnviarVehiculo = new EnviarVehiculo();
         $objEnviarRemesas = new EnviarRemesas();
@@ -146,6 +146,15 @@ class Despachos extends TPage {
         $this->cargarErrores();
         $this->cargarDespachos();
     }
+    
+    public function changePage($sender, $param) {
+        $this->DGDespachos->CurrentPageIndex = $param->NewPageIndex; // Recupera la p�gina que ha sido seleccionada y que ser� mostrada.
+        $this->cargarDespachos();
+    }
+
+    public function pagerCreated($sender, $param) {
+        $param->Pager->Controls->insertAt(0, 'page: ');
+    }    
 }
 
 ?>

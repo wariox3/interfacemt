@@ -14,7 +14,9 @@
                 HeaderStyle.CssClass="header-fondo"
                 ItemStyle.CssClass="item-style"
                 AlternatingItemStyle.CssClass="alternating-style"
-                OnDeleteCommand="procesarDespachoUnico">
+                OnDeleteCommand="procesarDespachoUnico"
+                OnPageIndexChanged="changePage"
+                OnPagerCreated="pagerCreated">
 
                 <com:TBoundColumn
                     ID="ClmOrdDespacho"
