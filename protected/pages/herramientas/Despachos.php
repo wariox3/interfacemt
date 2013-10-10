@@ -90,14 +90,18 @@ class Despachos extends TPage {
     }
     
     public function cargarDespachos() {
+        $strSql = "SELECT despachos_control_mt.* "
+                . "FROM despachos_control_mt "
+                . "WHERE EnvioManifiesto = 0 "
+                . "ORDER BY OrdDespacho";
         $arDespachos = new DespachosControlMTRecord();
-        $arDespachos = DespachosControlMTRecord::finder()->FindAllBy_EnvioManifiesto(0);
+        $arDespachos = DespachosControlMTRecord::finder()->FindAllBySql($strSql);
         $this->DGDespachos->DataSource = $arDespachos;
         $this->DGDespachos->DataBind();        
     }    
     
     public function EnviarDespacho($intOrdDespacho) {
-        set_time_limit(480);
+        set_time_limit(10);
         $objEnviarTerceros = new EnviarTerceros();
         $objEnviarVehiculo = new EnviarVehiculo();
         $objEnviarRemesas = new EnviarRemesas();

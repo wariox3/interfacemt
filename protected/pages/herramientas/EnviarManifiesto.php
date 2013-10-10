@@ -3,18 +3,19 @@ prado::using("Application.pages.herramientas.General");
 class EnviarManifiesto {
     public function EnviarManifiestoLocal($intOrdDespacho) {
         $booResultados = TRUE;
+        $objGeneral = new General();                                       
+        $cliente = $objGeneral->CrearConexion();         
         $arDespacho = new DespachosRecord();
         $arDespacho = DespachosRecord::finder()->FindByPk($intOrdDespacho);
-        if($this->EnviarManifiestoWebServices($intOrdDespacho) == false){
+        if($this->EnviarManifiestoWebServices($intOrdDespacho, $cliente) == false){
             $booResultados = false;
         }
         return $booResultados;
     }
 
-    public function EnviarManifiestoWebServices($intOrdDespacho){
-        $objGeneral = new General();
-        $cliente = $objGeneral->CrearConexion();
+    public function EnviarManifiestoWebServices($intOrdDespacho, $cliente){;
         $boolResultadosEnvio = False;
+        $boolErroresDatos = FALSE;
         $arDespacho = new DespachosRecord();
         $arDespacho = DespachosRecord::finder()->FindByPk($intOrdDespacho);
         $strRegistroWS = "";
@@ -24,33 +25,35 @@ class EnviarManifiesto {
         else {
             if($this->ValidarDatosManifiesto($arDespacho) == true) {
                 $strXmlManifiesto = array('' => $this->GenerarXMLManifiesto($intOrdDespacho));
-                $respuesta = "";
-                try {
-                    $respuesta = $cliente->__soapCall('AtenderMensajeRNDC', $strXmlManifiesto);
-                    $cadena_xml = simplexml_load_string($respuesta);
-                    if($cadena_xml->ErrorMSG != "") {
-                        if(substr(strtoupper($cadena_xml->ErrorMSG),0,9) == "DUPLICADO") {
-                            $boolResultadosEnvio = TRUE;
-                        } elseif(substr($cadena_xml->ErrorMSG, 0, 23 ) == "Error al solicitar sesi") {
-                            sleep(4);
-                            $this->EnviarManifiestoWebServices($intOrdDespacho);
+                while ($boolResultadosEnvio == FALSE && $boolErroresDatos == FALSE) {
+                    $respuesta = "";
+                    try {
+                        $respuesta = $cliente->__soapCall('AtenderMensajeRNDC', $strXmlManifiesto);
+                        $cadena_xml = simplexml_load_string($respuesta);
+                        if($cadena_xml->ErrorMSG != "") {
+                            if(substr(strtoupper($cadena_xml->ErrorMSG),0,9) == "DUPLICADO") {
+                                $boolResultadosEnvio = TRUE;
+                            } elseif(substr($cadena_xml->ErrorMSG, 0, 19) == "Error al abrir sesi" || substr($cadena_xml->ErrorMSG, 0, 23) == "Error al realizar conex") {
+                                sleep(3);                                
+                            }
+                            else {
+                                General::InsertarErrorWS(2, "Manifiesto", $arDespacho->OrdDespacho, utf8_decode($cadena_xml->ErrorMSG));
+                                $boolErroresDatos = TRUE;
+                            }                            
                         }
-                        else {
-                            General::InsertarErrorWS(2, "Manifiesto", $arDespacho->OrdDespacho, utf8_decode($cadena_xml->ErrorMSG));
-                        }                            
-                    }
-                    if($cadena_xml->ingresoid) {
-                        General::InsertarErrorWS(2, "Manifiesto", $arDespacho->OrdDespacho, utf8_decode($cadena_xml->ingresoid));
-                        $strRegistroWS = utf8_decode($cadena_xml->ingresoid);
-                        $boolResultadosEnvio = true;
-                    }
-                } catch (Exception $e) {
-                    if(substr($e, 0, 19 ) == "SoapFault exception") {
-                        sleep(4);
-                        $this->EnviarManifiestoWebServices($intOrdDespacho);
-                    } else {
-                        General::InsertarErrorWS(1, "General", "", "Error al enviar parametros" . $e);
-                    }
+                        if($cadena_xml->ingresoid) {
+                            General::InsertarErrorWS(2, "Manifiesto", $arDespacho->OrdDespacho, utf8_decode($cadena_xml->ingresoid));
+                            $strRegistroWS = utf8_decode($cadena_xml->ingresoid);
+                            $boolResultadosEnvio = true;
+                        }
+                    } catch (Exception $e) {
+                        if(substr($e, 0, 19 ) == "SoapFault exception") {
+                            sleep(3);                            
+                        } else {
+                            General::InsertarErrorWS(1, "General", "", "Error al enviar parametros" . $e);
+                            $boolErroresDatos = TRUE;
+                        }
+                    }                    
                 }
             }
             else
@@ -63,7 +66,7 @@ class EnviarManifiesto {
         return $boolResultadosEnvio;
     }
 
-    public function ValidarDatosManifiesto ($arDespacho) {
+    public function ValidarDatosManifiesto ($arDespacho) {        
         $intResultadoValidacion = TRUE;
         return $intResultadoValidacion;
     }

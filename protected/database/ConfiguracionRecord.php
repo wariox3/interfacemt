@@ -16,6 +16,9 @@ class ConfiguracionRecord extends TActiveRecord
         public $UsaAutenticacion;
         public $UsaSSL;
         public $Puerto;
+        public $FechaAfectada;
+        public $HorasAfectacion;
+        public $AfectarAntesDe;
 
 	public static function finder($className=__CLASS__)
 	{

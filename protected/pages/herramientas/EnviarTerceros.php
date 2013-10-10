@@ -2,6 +2,7 @@
 prado::using("Application.pages.herramientas.General");
 class EnviarTerceros {
     public function EnviarTercerosManifiesto($intOrdDespacho) {
+        $objGeneral = new General();        
         $booResultados = TRUE;
         $arrTercero = array();
         $arDespacho = new DespachosRecord();
@@ -11,67 +12,77 @@ class EnviarTerceros {
         $arrTercero[] =  $arVehiculo->IdTenedor;
         $arrTercero[] =  $arVehiculo->IdPropietario;
         $arrTercero[] =  $arVehiculo->IdAseguradora;
+        $arrTercero[] =  $arDespacho->IdConductor;
         $strSql = "SELECT Cuenta FROM guias where IdDespacho = " . $intOrdDespacho . " GROUP BY Cuenta";
         $arGuias = new GuiasRecord();
         $arGuias = GuiasRecord::finder()->FindAllBySql($strSql);
         foreach ($arGuias as $arGuias) {
             $arrTercero[] = $arGuias->Cuenta;
         }
+        $cliente = $objGeneral->CrearConexion();
         //Procesar array tercero
         foreach ($arrTercero as $arrTercero) {
-            if($this->EnviarTerceroWebServices($arrTercero) == false){
+            if($this->EnviarTerceroWebServices($arrTercero, $cliente) == false){
                 $booResultados = false;
             }
         }
         return $booResultados;
     }
 
-    public function EnviarTerceroWebServices($intTercero){
-        $objGeneral = new General();
-        $cliente = $objGeneral->CrearConexion();
+    public function EnviarTerceroWebServices($intTercero, $cliente){
+        
         $boolResultadosEnvio = False;
+        $boolErroresDatos = FALSE;
         $arTercero = new TercerosRecord();
         $arTercero = TercerosRecord::finder()->with_Ciudad()->FindByPk($intTercero);
-        if($arTercero->ActualizadoWebServices == 1)
-            $boolResultadosEnvio = true;
-        else {
-            if($this->ValidarDatosTercero($arTercero) == true) {
-                $strXmlTercero = array('' => $this->GenerarXMLTercero($arTercero));
-                $respuesta = "";
-                try {
-                    $respuesta = $cliente->__soapCall('AtenderMensajeRNDC', $strXmlTercero);
-                    $cadena_xml = simplexml_load_string($respuesta);
-                    if($cadena_xml->ErrorMSG != "") {
-                        if(substr(strtoupper($cadena_xml->ErrorMSG),0,9) == "DUPLICADO") {
-                            $boolResultadosEnvio = TRUE;
-                        } elseif(substr($cadena_xml->ErrorMSG, 0, 23 ) == "Error al solicitar sesi") {
-                            sleep(4);
-                            $this->EnviarTerceroWebServices($intTercero);
-                        }
-                        else {
-                            General::InsertarErrorWS(2, "Personas", $arTercero->IDTercero, utf8_decode($cadena_xml->ErrorMSG));
-                        }                            
-                    }
-                    if($cadena_xml->ingresoid) {
-                        General::InsertarErrorWS(2, "Personas", $arTercero->IDTercero, utf8_decode($cadena_xml->ingresoid));
-                        $boolResultadosEnvio = true;
-                    }
-                } catch (Exception $e) {
-                    if(substr($e, 0, 19 ) == "SoapFault exception") {
-                        sleep(4);
-                        $this->EnviarTerceroWebServices($intTercero);
-                    }
-                    else {
-                        General::InsertarErrorWS(1, "General", "", "Error al enviar parametros" . $e);
+        if(count($arTercero) > 0) {
+            if($arTercero->ActualizadoWebServices == 1) {
+                $boolResultadosEnvio = true;
+            }
+            else {
+                if($this->ValidarDatosTercero($arTercero) == true) {                                                    
+                    $strXmlTercero = array('' => $this->GenerarXMLTercero($arTercero));                
+                    while ($boolResultadosEnvio == FALSE && $boolErroresDatos == FALSE) {
+                        $respuesta = "";
+                        try {
+                            $respuesta = $cliente->__soapCall('AtenderMensajeRNDC', $strXmlTercero);
+                            $cadena_xml = simplexml_load_string($respuesta);
+                            if($cadena_xml->ErrorMSG != "") {
+                                if(substr(strtoupper($cadena_xml->ErrorMSG),0,9) == "DUPLICADO") {
+                                    $boolResultadosEnvio = TRUE;
+                                } elseif(substr($cadena_xml->ErrorMSG, 0, 19) == "Error al abrir sesi" || substr($cadena_xml->ErrorMSG, 0, 23) == "Error al realizar conex") {
+                                    sleep(3);                                
+                                }
+                                else {
+                                    General::InsertarErrorWS(2, "Personas", $arTercero->IDTercero, utf8_decode($cadena_xml->ErrorMSG));
+                                    $boolErroresDatos = TRUE;
+                                }                            
+                            }
+                            if($cadena_xml->ingresoid) {
+                                General::InsertarErrorWS(2, "Personas", $arTercero->IDTercero, utf8_decode($cadena_xml->ingresoid));
+                                $boolResultadosEnvio = true;
+                            }
+                        } catch (Exception $e) {
+                            if(substr($e, 0, 19 ) == "SoapFault exception") {
+                                sleep(3);                            
+                            }
+                            else {
+                                General::InsertarErrorWS(1, "General", "", "Error al enviar parametros" . $e);
+                                $boolErroresDatos = TRUE;
+                            }
+                        }                    
                     }
                 }
-            }
-            else
-                $boolResultadosEnvio = false;
+                else
+                    $boolResultadosEnvio = false;
 
-            if($boolResultadosEnvio == true) {
-                $this->ActualizarTercero($intTercero);
-            }
+                if($boolResultadosEnvio == true) {
+                    $this->ActualizarTercero($intTercero);
+                }
+            }            
+        }
+        else {
+            General::InsertarErrorWS(2, "Personas", $intTercero, "El conductor con esta identificacion no esta creado en terceros, debe crearlo");
         }
 
         return $boolResultadosEnvio;
@@ -155,7 +166,7 @@ class EnviarTerceros {
 
     public function ActualizarTercero($intTercero) {
         $arTercero = new TercerosRecord();
-        $arTercero = TercerosRecord::finder()->with_Ciudad()->FindByPk($intTercero);
+        $arTercero = TercerosRecord::finder()->FindByPk($intTercero);
         $arTercero->ActualizadoWebServices = 1;
         $arTercero->save();
     }

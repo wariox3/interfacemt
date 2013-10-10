@@ -21,28 +21,34 @@
                     HeaderText="Orden"
                     HeaderStyle.Width="80px"
                     DataField="OrdDespacho"/>                              
+
+                <com:TBoundColumn
+                    ID="ClmManifiesto"
+                    HeaderText="Manifiesto"
+                    HeaderStyle.Width="80px"
+                    DataField="ManifiestoInterno"/>                 
                 
                 <com:TBoundColumn
                     ID="ClmEnvioPersona"
-                    HeaderText="Per"
+                    HeaderText="Personas"
                     HeaderStyle.Width="5px"
                     DataField="EnvioPersona"/>                
 
                 <com:TBoundColumn
                     ID="ClmEnvioVehiculo"
-                    HeaderText="Veh"
+                    HeaderText="Vehiculos"
                     HeaderStyle.Width="5px"
                     DataField="EnvioVehiculo"/>                 
 
                 <com:TBoundColumn
                     ID="ClmEnvioGuias"
-                    HeaderText="Gui"
+                    HeaderText="Guias"
                     HeaderStyle.Width="5px"
                     DataField="EnvioGuias"/>
 
                 <com:TBoundColumn
                     ID="ClmEnvioManifiesto"
-                    HeaderText="Man"
+                    HeaderText="Enviado"
                     HeaderStyle.Width="5px"
                     DataField="EnvioManifiesto"/>                
                 

@@ -3,23 +3,24 @@ prado::using("Application.pages.herramientas.General");
 class EnviarRemesas {
     public function EnviarRemesasManifiesto($intOrdDespacho) {
         $booResultados = TRUE;
+        $objGeneral = new General();                                       
+        $cliente = $objGeneral->CrearConexion();        
         $arDespacho = new DespachosRecord();
         $arDespacho = DespachosRecord::finder()->FindByPk($intOrdDespacho);        
         $strSql = "SELECT Guia FROM guias where IdDespacho = " . $intOrdDespacho;
         $arGuias = new GuiasRecord();
         $arGuias = GuiasRecord::finder()->FindAllBySql($strSql);
         foreach ($arGuias as $arGuias) {
-            if($this->EnviarGuiaWebServices($arGuias->Guia, $arDespacho) == false){
+            if($this->EnviarGuiaWebServices($arGuias->Guia, $arDespacho, $cliente) == false){
                 $booResultados = false;
             }  
         }                              
         return $booResultados;
     }
     
-    public function EnviarGuiaWebServices($intGuia, $arDespacho){
-        $objGeneral = new General();                                       
-        $cliente = $objGeneral->CrearConexion();
-        $boolResultadosEnvio = False;                
+    public function EnviarGuiaWebServices($intGuia, $arDespacho, $cliente){
+        $boolResultadosEnvio = False;  
+        $boolErroresDatos = FALSE;
         $arGuia = new GuiasRecord();
         $arGuia = GuiasRecord::finder()->with_ClienteRemitente()->FindByPk($intGuia);        
         if($arGuia->ActualizadoWebServices == 1)
@@ -27,32 +28,34 @@ class EnviarRemesas {
         else {
             if($this->ValidarDatosGuia($arGuia) == true) {
                 $strXmlGuia = array('' => $this->GenerarXMLGuia($arGuia, $arDespacho));
-                $respuesta = "";
-                try {
-                    $respuesta = $cliente->__soapCall('AtenderMensajeRNDC', $strXmlGuia);
-                    $cadena_xml = simplexml_load_string($respuesta);
-                    if($cadena_xml->ErrorMSG != "") {
-                        if(substr(strtoupper($cadena_xml->ErrorMSG),0,9) == "DUPLICADO") {
-                            $boolResultadosEnvio = true;                          
-                        } elseif(substr($cadena_xml->ErrorMSG, 0, 23 ) == "Error al solicitar sesi") {
-                            sleep(4);
-                            $this->EnviarGuiaWebServices($intGuia, $arDespacho);
-                        }                        
-                        else {
-                            General::InsertarErrorWS(2, "Remesas", $arGuia->Guia, utf8_decode($cadena_xml->ErrorMSG));                            
+                while ($boolResultadosEnvio == FALSE && $boolErroresDatos == FALSE) {
+                    $respuesta = "";
+                    try {
+                        $respuesta = $cliente->__soapCall('AtenderMensajeRNDC', $strXmlGuia);
+                        $cadena_xml = simplexml_load_string($respuesta);
+                        if($cadena_xml->ErrorMSG != "") {
+                            if(substr(strtoupper($cadena_xml->ErrorMSG),0,9) == "DUPLICADO") {
+                                $boolResultadosEnvio = true;                          
+                            } elseif(substr($cadena_xml->ErrorMSG, 0, 19) == "Error al abrir sesi" || substr($cadena_xml->ErrorMSG, 0, 23) == "Error al realizar conex") {
+                                sleep(3);                                
+                            }                        
+                            else {
+                                General::InsertarErrorWS(2, "Remesas", $arGuia->Guia, utf8_decode($cadena_xml->ErrorMSG));                            
+                                $boolErroresDatos = TRUE;
+                            }
                         }
-                    }
-                    if($cadena_xml->ingresoid) {
-                        General::InsertarErrorWS(2, "Remesas", $arGuia->Guia, utf8_decode($cadena_xml->ingresoid));                        
-                        $boolResultadosEnvio = true;
+                        if($cadena_xml->ingresoid) {
+                            General::InsertarErrorWS(2, "Remesas", $arGuia->Guia, utf8_decode($cadena_xml->ingresoid));                        
+                            $boolResultadosEnvio = true;
+                        }                    
+                    } catch (Exception $e) {
+                        if(substr($e, 0, 19 ) == "SoapFault exception") {
+                            sleep(3);
+                        } else { 
+                            General::InsertarErrorWS(1, "General", "", "Error al enviar parametros" . $e);
+                            $boolErroresDatos = TRUE;
+                        }                                         
                     }                    
-                } catch (Exception $e) {
-                    if(substr($e, 0, 19 ) == "SoapFault exception") {
-                        sleep(4);
-                        $this->EnviarGuiaWebServices($intGuia, $arDespacho);
-                    } else { 
-                        General::InsertarErrorWS(1, "General", "", "Error al enviar parametros" . $e);
-                    }                                         
                 }
             }
             else

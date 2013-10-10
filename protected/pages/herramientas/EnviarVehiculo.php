@@ -3,18 +3,19 @@ prado::using("Application.pages.herramientas.General");
 class EnviarVehiculo {
     public function EnviarVehiculoManifiesto($intOrdDespacho) {
         $booResultados = TRUE;
+        $objGeneral = new General();                                       
+        $cliente = $objGeneral->CrearConexion();        
         $arDespacho = new DespachosRecord();
         $arDespacho = DespachosRecord::finder()->FindByPk($intOrdDespacho);        
-        if($this->EnviarVehiculoWebServices($arDespacho->IdVehiculo) == false){
+        if($this->EnviarVehiculoWebServices($arDespacho->IdVehiculo, $cliente) == false){
             $booResultados = false;
         }  
         return $booResultados;
     }
     
-    public function EnviarVehiculoWebServices($strVehiculo){
-        $objGeneral = new General();                                       
-        $cliente = $objGeneral->CrearConexion();
-        $boolResultadosEnvio = False;        
+    public function EnviarVehiculoWebServices($strVehiculo, $cliente){
+        $boolResultadosEnvio = False;     
+        $boolErroresDatos = FALSE;
         $arVehiculo = new VehiculosRecord();
         $arVehiculo = VehiculosRecord::finder()->with_Tenedor()->with_Propietario()->findByPk($strVehiculo);
         if($arVehiculo->ActualizadoWebServices == 1){
@@ -23,35 +24,34 @@ class EnviarVehiculo {
         else {
             if($this->ValidarDatosVehiculo($arVehiculo) == true) {
                 $strXmlVehiculo = array('' => $this->GenerarXMLVehiculo($arVehiculo));
-                $respuesta = "";
-                try {                    
-                    $respuesta = $cliente->__soapCall('AtenderMensajeRNDC', $strXmlVehiculo);
-                    //var_dump($cliente->__getFunctions());
-                    
-                    $cadena_xml = simplexml_load_string($respuesta);
-                    if($cadena_xml->ErrorMSG != "") {
-                        if(substr(strtoupper($cadena_xml->ErrorMSG),0,9) == "DUPLICADO") {
-                            $boolResultadosEnvio = TRUE;       
-                        } elseif(substr($cadena_xml->ErrorMSG, 0, 23 ) == "Error al solicitar sesi") {
-                            sleep(4);
-                            $this->EnviarVehiculoWebServices($strVehiculo);
+                while ($boolResultadosEnvio == FALSE && $boolErroresDatos == FALSE) {
+                    $respuesta = "";
+                    try {                    
+                        $respuesta = $cliente->__soapCall('AtenderMensajeRNDC', $strXmlVehiculo);
+                        $cadena_xml = simplexml_load_string($respuesta);
+                        if($cadena_xml->ErrorMSG != "") {
+                            if(substr(strtoupper($cadena_xml->ErrorMSG),0,9) == "DUPLICADO") {
+                                $boolResultadosEnvio = TRUE;       
+                            } elseif(substr($cadena_xml->ErrorMSG, 0, 19) == "Error al abrir sesi" || substr($cadena_xml->ErrorMSG, 0, 23) == "Error al realizar conex") {
+                                sleep(3);                                
+                            } else {
+                                General::InsertarErrorWS(2, "Vehiculos", $arVehiculo->IdPlaca, utf8_decode($cadena_xml->ErrorMSG));                            
+                                $boolErroresDatos = TRUE;
+                            }
                         }
-                        else {
-                            General::InsertarErrorWS(2, "Vehiculos", $arVehiculo->IdPlaca, utf8_decode($cadena_xml->ErrorMSG));                            
+                        if($cadena_xml->ingresoid) {
+                            General::InsertarErrorWS(2, "Vehiculos", $arVehiculo->IdPlaca, utf8_decode($cadena_xml->ingresoid));                        
+                            $boolResultadosEnvio = true;
+                        }                    
+                    } catch (Exception $e) {           
+                        if(substr($e, 0, 19 ) == "SoapFault exception") {
+                            sleep(3);                            
                         }
-                    }
-                    if($cadena_xml->ingresoid) {
-                        General::InsertarErrorWS(2, "Vehiculos", $arVehiculo->IdPlaca, utf8_decode($cadena_xml->ingresoid));                        
-                        $boolResultadosEnvio = true;
+                        else { 
+                            General::InsertarErrorWS(1, "General", "", "Error al enviar parametros" . $e);
+                            $boolErroresDatos = TRUE;
+                        }                                            
                     }                    
-                } catch (Exception $e) {           
-                    if(substr($e, 0, 19 ) == "SoapFault exception") {
-                        sleep(4);
-                        $this->EnviarVehiculoWebServices($strVehiculo);
-                    }
-                    else { 
-                        General::InsertarErrorWS(1, "General", "", "Error al enviar parametros" . $e);
-                    }                                            
                 }
             }
             else
