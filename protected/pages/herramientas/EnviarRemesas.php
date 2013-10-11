@@ -86,15 +86,15 @@ class EnviarRemesas {
         $strExpedirRemesaXML ="<?xml version='1.0' encoding='ISO-8859-1' ?>
                                 <root>
                                     <acceso>
-                                        <username>entregandomed@0841</username>
-                                        <password>TKLLUVTPHT</password>
+                                        <username>$arConfiguracion->UsuarioWS</username>
+                                        <password>$arConfiguracion->ClaveWS</password>
                                     </acceso>
                                     <solicitud>
                                         <tipo>1</tipo>
                                         <procesoid>3</procesoid>
                                     </solicitud>
                                     <variables>
-                                        <NUMNITEMPRESATRANSPORTE>8300379211</NUMNITEMPRESATRANSPORTE>
+                                        <NUMNITEMPRESATRANSPORTE>$arConfiguracion->EmpresaWS</NUMNITEMPRESATRANSPORTE>
                                         <CONSECUTIVOREMESA>$arGuia->Guia</CONSECUTIVOREMESA>
                                         <CODOPERACIONTRANSPORTE>P</CODOPERACIONTRANSPORTE>
                                         <CODTIPOEMPAQUE>0</CODTIPOEMPAQUE>
