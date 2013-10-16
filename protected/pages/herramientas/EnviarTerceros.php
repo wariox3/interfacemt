@@ -110,7 +110,7 @@ class EnviarTerceros {
             $intResultadoValidacion = FALSE;
             General::InsertarErrorWS(3, "Personas", $arTercero->IDTercero, "El tercero debe tener celular o telefono");
         }
-        $strDireccion = $arTercero->Direccion;
+        $strDireccion = utf8_decode($arTercero->Direccion);
         $boolEnie = strpos($strDireccion, "ñ");
         $boolNumSimbolo = strpos($strDireccion, "°");
         $boolNum = strpos($strDireccion, "#");
@@ -156,7 +156,7 @@ class EnviarTerceros {
                                         $strTerceroXML .= "<NUMCELULARPERSONA>" . $arTercero->Celular . "</NUMCELULARPERSONA>";
                                     }
                                     $strTerceroXML .= "
-                                    <NOMENCLATURADIRECCION>" . $arTercero->Direccion . "</NOMENCLATURADIRECCION>
+                                    <NOMENCLATURADIRECCION>" . utf8_decode($arTercero->Direccion) . "</NOMENCLATURADIRECCION>
                                     <CODMUNICIPIORNDC>" . $arTercero->Ciudad->CodigoDivision . "</CODMUNICIPIORNDC>";
                                     if(count($arConductor) > 0 && $arTercero->TpDoc =="C") {
                                         $dateFechaVenceLic = substr($arConductor->FhVenceLic, 8, 2) . "/" . substr($arConductor->FhVenceLic, 5, 2) . "/" . substr($arConductor->FhVenceLic, 0, 4);
