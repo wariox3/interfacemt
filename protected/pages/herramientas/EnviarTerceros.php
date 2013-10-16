@@ -13,7 +13,7 @@ class EnviarTerceros {
         $arrTercero[] =  $arVehiculo->IdPropietario;
         $arrTercero[] =  $arVehiculo->IdAseguradora;
         $arrTercero[] =  $arDespacho->IdConductor;
-        $strSql = "SELECT Cuenta FROM guias where IdDespacho = " . $intOrdDespacho . " GROUP BY Cuenta";
+        $strSql = "SELECT Cuenta FROM guias LEFT JOIN terceros on guias.Cuenta = terceros.IDTercero where terceros.ActualizadoWebServices = 0 AND IdDespacho = " . $intOrdDespacho . " GROUP BY Cuenta";
         $arGuias = new GuiasRecord();
         $arGuias = GuiasRecord::finder()->FindAllBySql($strSql);
         foreach ($arGuias as $arGuias) {
@@ -109,6 +109,14 @@ class EnviarTerceros {
         if($arTercero->Telefono == "" && $arTercero->Celular == "") {
             $intResultadoValidacion = FALSE;
             General::InsertarErrorWS(3, "Personas", $arTercero->IDTercero, "El tercero debe tener celular o telefono");
+        }
+        $strDireccion = $arTercero->Direccion;
+        $boolEnie = strpos($strDireccion, "ñ");
+        $boolNumSimbolo = strpos($strDireccion, "°");
+        $boolNum = strpos($strDireccion, "#");
+        if($boolEnie === true || $boolNumSimbolo === true || $boolNum === true) {
+            $intResultadoValidacion = FALSE;
+            General::InsertarErrorWS(3, "Personas", $arTercero->IDTercero, "La direccion del tercero no puede contener caracteres especiales");            
         }
         return $intResultadoValidacion;
     }
