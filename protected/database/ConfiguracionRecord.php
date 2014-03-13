@@ -19,6 +19,7 @@ class ConfiguracionRecord extends TActiveRecord
         public $FechaAfectada;
         public $HorasAfectacion;
         public $AfectarAntesDe;
+        public $ConsecutivoGuiasFactura;
 
 	public static function finder($className=__CLASS__)
 	{
