@@ -101,7 +101,7 @@ class Despachos extends TPage {
     }    
     
     public function EnviarDespacho($intOrdDespacho) {
-        set_time_limit(60);
+        set_time_limit(0);
         $objEnviarTerceros = new EnviarTerceros();
         $objEnviarVehiculo = new EnviarVehiculo();
         $objEnviarRemesas = new EnviarRemesas();
