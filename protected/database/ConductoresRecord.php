@@ -35,6 +35,8 @@ class ConductoresRecord extends TActiveRecord
 	public $FhNac;
 	public $ConductorInactivo;
 	public $ImagenConductor;
+        public $NroSeguridadSocial;
+        public $FhVenceSeguridadSocial;
 
 	public static function finder($className=__CLASS__)
 	{

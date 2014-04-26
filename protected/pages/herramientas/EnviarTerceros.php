@@ -13,12 +13,12 @@ class EnviarTerceros {
         $arrTercero[] =  $arVehiculo->IdPropietario;
         $arrTercero[] =  $arVehiculo->IdAseguradora;
         $arrTercero[] =  $arDespacho->IdConductor;
-        $strSql = "SELECT Cuenta FROM guias LEFT JOIN terceros on guias.Cuenta = terceros.IDTercero where terceros.ActualizadoWebServices = 0 AND IdDespacho = " . $intOrdDespacho . " GROUP BY Cuenta";
+        /*$strSql = "SELECT Cuenta FROM guias LEFT JOIN terceros on guias.Cuenta = terceros.IDTercero where terceros.ActualizadoWebServices = 0 AND IdDespacho = " . $intOrdDespacho . " GROUP BY Cuenta";
         $arGuias = new GuiasRecord();
         $arGuias = GuiasRecord::finder()->FindAllBySql($strSql);
         foreach ($arGuias as $arGuias) {
             $arrTercero[] = $arGuias->Cuenta;
-        }
+        }*/
         $cliente = $objGeneral->CrearConexion();
         //Procesar array tercero
         foreach ($arrTercero as $arrTercero) {

@@ -65,6 +65,7 @@ class DespachosRecord extends TActiveRecord
 	public $AbonosCE;
 	public $FletesNoCancelados;
 	public $EnviadoMT;
+        public $EnviadoGuia;
         public $CiudadOrigen; //Array de tipo (Ciudad)
         public $CiudadDestino; //Array de tipo (Ciudad)        
         public static $RELATIONS = array(

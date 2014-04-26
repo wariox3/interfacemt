@@ -40,6 +40,7 @@ class VehiculosRecord extends TActiveRecord
 	public $TipoCombustible;
         public $ActualizadoWebServices;
         public $NumeroTecnicomecanica;
+        public $FhVenceTecnicomecanica;
         public $Tenedor; //Array de tipo (Tercero)        
         public $Propietario; //Array de tipo (Tercero)        
         

@@ -6,28 +6,21 @@ class EnviarRemesas {
         $objGeneral = new General();                                       
         $cliente = $objGeneral->CrearConexion();        
         $arDespacho = new DespachosRecord();
-        $arDespacho = DespachosRecord::finder()->FindByPk($intOrdDespacho);        
-        $strSql = "SELECT Guia FROM guias where IdDespacho = " . $intOrdDespacho;
-        $arGuias = new GuiasRecord();
-        $arGuias = GuiasRecord::finder()->FindAllBySql($strSql);
-        foreach ($arGuias as $arGuias) {
-            if($this->EnviarGuiaWebServices($arGuias->Guia, $arDespacho, $cliente) == false){
-                $booResultados = false;
-            }  
-        }                              
+        $arDespacho = DespachosRecord::finder()->FindByPk($intOrdDespacho);                
+        if($this->EnviarGuiaWebServices($arDespacho, $cliente) == false){
+            $booResultados = false;
+        }          
         return $booResultados;
     }
     
-    public function EnviarGuiaWebServices($intGuia, $arDespacho, $cliente){
+    public function EnviarGuiaWebServices($arDespacho, $cliente){
         $boolResultadosEnvio = False;  
         $boolErroresDatos = FALSE;
-        $arGuia = new GuiasRecord();
-        $arGuia = GuiasRecord::finder()->with_ClienteRemitente()->FindByPk($intGuia);        
-        if($arGuia->ActualizadoWebServices == 1)
+        if($arDespacho->EnviadoGuia == 1)
             $boolResultadosEnvio = true;
         else {
-            if($this->ValidarDatosGuia($arGuia) == true) {
-                $strXmlGuia = array('' => $this->GenerarXMLGuia($arGuia, $arDespacho));
+            if($this->ValidarDatosGuia() == true) {
+                $strXmlGuia = array('' => $this->GenerarXMLGuia($arDespacho));
                 while ($boolResultadosEnvio == FALSE && $boolErroresDatos == FALSE) {
                     $respuesta = "";
                     try {
@@ -40,12 +33,12 @@ class EnviarRemesas {
                                 sleep(3);                                
                             }                        
                             else {
-                                General::InsertarErrorWS(2, "Remesas", $arGuia->Guia, utf8_decode($cadena_xml->ErrorMSG));                            
+                                General::InsertarErrorWS(2, "Remesas", $arDespacho->IdManifiesto, utf8_decode($cadena_xml->ErrorMSG));                            
                                 $boolErroresDatos = TRUE;
                             }
                         }
                         if($cadena_xml->ingresoid) {
-                            General::InsertarErrorWS(2, "Remesas", $arGuia->Guia, utf8_decode($cadena_xml->ingresoid));                        
+                            General::InsertarErrorWS(2, "Remesas", $arDespacho->IdManifiesto, utf8_decode($cadena_xml->ingresoid));                        
                             $boolResultadosEnvio = true;
                         }                    
                     } catch (Exception $e) {
@@ -62,25 +55,25 @@ class EnviarRemesas {
                 $boolResultadosEnvio = false; 
             
             if($boolResultadosEnvio == true) {
-                $this->ActualizarGuia($intGuia);
+                $this->ActualizarGuia($arDespacho);
             }            
         }            
         return $boolResultadosEnvio;
     }
     
-    public function ValidarDatosGuia ($arGuia) {
+    public function ValidarDatosGuia () {
         $intResultadoValidacion = TRUE;
         return $intResultadoValidacion;            
     }
     
-    public function GenerarXMLGuia($arGuia, $arDespacho) {
+    public function GenerarXMLGuia($arDespacho) {
         $arConfiguracion = new ConfiguracionRecord();
         $arConfiguracion = ConfiguracionRecord::finder()->findByPk(1); 
         $arInformacionEmpresa = new InformacionEmpresaRecord();
         $arInformacionEmpresa = InformacionEmpresaRecord::finder()->findByPk(1);
         $strExpedirRemesaXML = "";
         $dateFechaVencePoliza = substr($arInformacionEmpresa->VencePoliza, 8, 2) . "/" . substr($arInformacionEmpresa->VencePoliza, 5, 2) . "/" . substr($arInformacionEmpresa->VencePoliza, 0, 4);
-        $dateFechaCargue = substr($arGuia->FhEntradaBodega, 8, 2) . "/" . substr($arGuia->FhEntradaBodega, 5, 2) . "/" . substr($arGuia->FhEntradaBodega, 0, 4);
+        $dateFechaCargue = substr($arDespacho->FhExpedicion, 8, 2) . "/" . substr($arDespacho->FhExpedicion, 5, 2) . "/" . substr($arDespacho->FhExpedicion, 0, 4);
         $dateFechaPactadaCargue = substr($arDespacho->FhExpedicion, 8, 2) . "/" . substr($arDespacho->FhExpedicion, 5, 2) . "/" . substr($arDespacho->FhExpedicion, 0, 4);
         $dateFechaPactadaDescargueCargue = substr($arDespacho->FhPagoSaldo, 8, 2) . "/" . substr($arDespacho->FhPagoSaldo, 5, 2) . "/" . substr($arDespacho->FhPagoSaldo, 0, 4);
         $strExpedirRemesaXML ="<?xml version='1.0' encoding='ISO-8859-1' ?>
@@ -95,22 +88,22 @@ class EnviarRemesas {
                                     </solicitud>
                                     <variables>
                                         <NUMNITEMPRESATRANSPORTE>$arConfiguracion->EmpresaWS</NUMNITEMPRESATRANSPORTE>
-                                        <CONSECUTIVOREMESA>$arGuia->Guia</CONSECUTIVOREMESA>
+                                        <CONSECUTIVOREMESA>$arDespacho->IdManifiesto</CONSECUTIVOREMESA>
                                         <CODOPERACIONTRANSPORTE>P</CODOPERACIONTRANSPORTE>
                                         <CODTIPOEMPAQUE>0</CODTIPOEMPAQUE>
                                         <CODNATURALEZACARGA>1</CODNATURALEZACARGA>                                                  
                                         <DESCRIPCIONCORTAPRODUCTO>PAQUETES VARIOS</DESCRIPCIONCORTAPRODUCTO>
                                         <MERCANCIAREMESA>009880</MERCANCIAREMESA>
-                                        <CANTIDADCARGADA>$arGuia->KilosReales</CANTIDADCARGADA>
+                                        <CANTIDADCARGADA>$arDespacho->KilosReales</CANTIDADCARGADA>
                                         <UNIDADMEDIDACAPACIDAD>1</UNIDADMEDIDACAPACIDAD>
-                                        <CODTIPOIDREMITENTE>" . $arGuia->ClienteRemitente->TpDoc . "</CODTIPOIDREMITENTE>
-                                        <NUMIDREMITENTE>$arGuia->Cuenta</NUMIDREMITENTE>
+                                        <CODTIPOIDREMITENTE>N</CODTIPOIDREMITENTE>
+                                        <NUMIDREMITENTE>$arConfiguracion->EmpresaWS</NUMIDREMITENTE>
                                         <CODSEDEREMITENTE>1</CODSEDEREMITENTE>
                                         <CODTIPOIDDESTINATARIO>C</CODTIPOIDDESTINATARIO>
                                         <NUMIDDESTINATARIO>22222</NUMIDDESTINATARIO>
                                         <CODSEDEDESTINATARIO>1</CODSEDEDESTINATARIO>
-                                        <CODTIPOIDPROPIETARIO>" . $arGuia->ClienteRemitente->TpDoc . "</CODTIPOIDPROPIETARIO>
-                                        <NUMIDPROPIETARIO>$arGuia->Cuenta</NUMIDPROPIETARIO>
+                                        <CODTIPOIDPROPIETARIO>N</CODTIPOIDPROPIETARIO>
+                                        <NUMIDPROPIETARIO>$arConfiguracion->EmpresaWS</NUMIDPROPIETARIO>
                                         <CODSEDEPROPIETARIO>1</CODSEDEPROPIETARIO>
                                         <DUENOPOLIZA>E</DUENOPOLIZA>
                                         <NUMPOLIZATRANSPORTE>$arInformacionEmpresa->NroPoliza</NUMPOLIZATRANSPORTE>
@@ -129,11 +122,11 @@ class EnviarRemesas {
         return $strExpedirRemesaXML;
     }  
     
-    public function ActualizarGuia($intGuia) {
-        $arGuia = new GuiasRecord();
-        $arGuia = GuiasRecord::finder()->FindByPk($intGuia);
-        $arGuia->ActualizadoWebServices = 1;
-        $arGuia->save();
+    public function ActualizarGuia($arDespachoParametro) {
+        $arDespacho = new DespachosRecord();
+        $arDespacho = DespachosRecord::finder()->FindByPk($arDespachoParametro->OrdDespacho);
+        $arDespacho->EnviadoGuia = 1;
+        $arDespacho->save();
     }
 }
 ?>

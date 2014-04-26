@@ -81,15 +81,10 @@ class EnviarManifiesto {
         $arVehiculo = VehiculosRecord::finder()->with_Tenedor()->FindByPk($arDespacho->IdVehiculo);
         $arTerceroConductor = new TercerosRecord();
         $arTerceroConductor = TercerosRecord::finder()->FindByPk($arDespacho->IdConductor);
-        $arGuias = new GuiasRecord();
-        $arGuias = GuiasRecord::finder()->FindAllBy_IdDespacho($intOrdDespacho);
+
         $dateFechaExpedicion = substr($arDespacho->FhExpedicion, 8, 2) . "/" . substr($arDespacho->FhExpedicion, 5, 2) . "/" . substr($arDespacho->FhExpedicion, 0, 4);
         $dateFechaPagoSaldo = substr($arDespacho->FhPagoSaldo, 8, 2) . "/" . substr($arDespacho->FhPagoSaldo, 5, 2) . "/" . substr($arDespacho->FhPagoSaldo, 0, 4);
-        if(count($arDespacho) > 0) {
-            $strRemesas = "";
-            foreach ($arGuias as $arGuias) {
-                $strRemesas .= "<REMESA><CONSECUTIVOREMESA>$arGuias->Guia</CONSECUTIVOREMESA></REMESA>";
-            }
+        if(count($arDespacho) > 0) {                            
             $strExpedirManifiestoXML = "<?xml version='1.0' encoding='ISO-8859-1' ?>
                                             <root>
                                              <acceso>
@@ -116,12 +111,12 @@ class EnviarManifiesto {
                                                 <RETENCIONFUENTEMANIFIESTO>$arDespacho->VrDctoRteFte</RETENCIONFUENTEMANIFIESTO>
                                                 <RETENCIONICAMANIFIESTOCARGA>0</RETENCIONICAMANIFIESTOCARGA>
                                                 <VALORANTICIPOMANIFIESTO>$arDespacho->VrAnticipo</VALORANTICIPOMANIFIESTO>
-                                                <FECHAPAGOSALDOMANIFIESTO>$dateFechaPagoSaldo</FECHAPAGOSALDOMANIFIESTO>
+                                                <FECHAPAGOSALDOMANIFIESTO>$dateFechaPagoSaldo</FECHAPAGOSALDOMANIFIESTO>                                                
                                                 <CODRESPONSABLEPAGOCARGUE>E</CODRESPONSABLEPAGOCARGUE>
                                                 <CODRESPONSABLEPAGODESCARGUE>E</CODRESPONSABLEPAGODESCARGUE>
                                                 <OBSERVACIONES>NADA</OBSERVACIONES>
                                                 <CODMUNICIPIOPAGOSALDO>05001000</CODMUNICIPIOPAGOSALDO>
-						<REMESASMAN procesoid='43'>".$strRemesas."</REMESASMAN>
+						<REMESASMAN procesoid='43'><REMESA><CONSECUTIVOREMESA>$arDespacho->IdManifiesto</CONSECUTIVOREMESA></REMESA></REMESASMAN>
                                     </variables>
                     </root>";
 
