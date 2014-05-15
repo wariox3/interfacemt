@@ -15,6 +15,7 @@
                 ItemStyle.CssClass="item-style"
                 AlternatingItemStyle.CssClass="alternating-style"
                 OnDeleteCommand="procesarDespachoUnico"
+                OnEditCommand="reiniciarEnvioDespacho"
                 OnPageIndexChanged="changePage"
                 OnPagerCreated="pagerCreated">
 
@@ -71,6 +72,15 @@
                     </prop:ItemTemplate>
                 </com:TTemplateColumn>                
 
+                <com:TTemplateColumn HeaderText="Procesar" ID="ClmReiniciarEnvio" ItemStyle.HorizontalAlign="Center"  >
+                    <prop:ItemTemplate>
+                        <com:TButton
+                            ID="EditColumn"
+                            Text = "Reiniciar envio"
+                            CommandName="edit"/>
+                    </prop:ItemTemplate>
+                </com:TTemplateColumn>                                
+                
             </com:TDataGrid>
             <com:TButton ID="BtnGenerarSeleccionados" OnClick="procesarDespachoVarios" Text="Generar seleccionados" visible ="false"/>
             <com:TActiveLabel ID="LblMensaje" Text =""/>

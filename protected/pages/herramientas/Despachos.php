@@ -19,6 +19,19 @@ class Despachos extends TPage {
         $this->EnviarDespacho($intOrdDespacho);
     }
     
+    public function reiniciarEnvioDespacho($sender, $param) {
+        $registro = $param->Item;   
+        $intOrdDespacho = $this->DGDespachos->Datakeys[$registro->ItemIndex];                
+        $arDespachosControlMt = new DespachosControlMTRecord();
+        $arDespachosControlMt = DespachosControlMTRecord::finder()->findByPk($intOrdDespacho);
+        $arDespachosControlMt->EnvioPersona = 0;
+        $arDespachosControlMt->EnvioVehiculo = 0;
+        $arDespachosControlMt->EnvioGuias = 0;
+        $arDespachosControlMt->save();
+        $this->cargarErrores();
+        $this->cargarDespachos();
+    }    
+    
     public function procesarDespacho($intOrdDespacho) {        
         $intResultados = 3;
         $intNumeroIntentos = 30;
