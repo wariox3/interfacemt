@@ -73,10 +73,11 @@ class EnviarManifiesto {
 
     public function GenerarXMLManifiesto($intOrdDespacho) {
         $arConfiguracion = new ConfiguracionRecord();
-        $arConfiguracion = ConfiguracionRecord::finder()->findByPk(1);
+        $arConfiguracion = ConfiguracionRecord::finder()->findByPk(1);        
         $strExpedirManifiestoXML = "";
         $arDespacho = new DespachosRecord();
         $arDespacho = DespachosRecord::finder()->with_CiudadOrigen()->with_CiudadDestino()->FindByPk($intOrdDespacho);
+        $strGuia = $arConfiguracion->PrefijoGuiaWs.$arDespacho->IdManifiesto;
         $arVehiculo = new VehiculosRecord();
         $arVehiculo = VehiculosRecord::finder()->with_Tenedor()->FindByPk($arDespacho->IdVehiculo);
         $arTerceroConductor = new TercerosRecord();
@@ -116,7 +117,7 @@ class EnviarManifiesto {
                                                 <CODRESPONSABLEPAGODESCARGUE>E</CODRESPONSABLEPAGODESCARGUE>
                                                 <OBSERVACIONES>NADA</OBSERVACIONES>
                                                 <CODMUNICIPIOPAGOSALDO>05001000</CODMUNICIPIOPAGOSALDO>
-						<REMESASMAN procesoid='43'><REMESA><CONSECUTIVOREMESA>$arDespacho->IdManifiesto</CONSECUTIVOREMESA></REMESA></REMESASMAN>
+						<REMESASMAN procesoid='43'><REMESA><CONSECUTIVOREMESA>$strGuia</CONSECUTIVOREMESA></REMESA></REMESASMAN>
                                     </variables>
                     </root>";
 

@@ -21,6 +21,7 @@ class ConfiguracionRecord extends TActiveRecord
         public $AfectarAntesDe;
         public $ConsecutivoGuiasFactura;
         public $ImprimirGuiaFormato;
+        public $PrefijoGuiaWs;
 
 	public static function finder($className=__CLASS__)
 	{

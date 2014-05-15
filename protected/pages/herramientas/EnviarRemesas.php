@@ -69,6 +69,7 @@ class EnviarRemesas {
     public function GenerarXMLGuia($arDespacho) {
         $arConfiguracion = new ConfiguracionRecord();
         $arConfiguracion = ConfiguracionRecord::finder()->findByPk(1); 
+        $strGuia = $arConfiguracion->PrefijoGuiaWs.$arDespacho->IdManifiesto;
         $arInformacionEmpresa = new InformacionEmpresaRecord();
         $arInformacionEmpresa = InformacionEmpresaRecord::finder()->findByPk(1);
         $strExpedirRemesaXML = "";
@@ -88,7 +89,7 @@ class EnviarRemesas {
                                     </solicitud>
                                     <variables>
                                         <NUMNITEMPRESATRANSPORTE>$arConfiguracion->EmpresaWS</NUMNITEMPRESATRANSPORTE>
-                                        <CONSECUTIVOREMESA>$arDespacho->IdManifiesto</CONSECUTIVOREMESA>
+                                        <CONSECUTIVOREMESA>$strGuia</CONSECUTIVOREMESA>
                                         <CODOPERACIONTRANSPORTE>P</CODOPERACIONTRANSPORTE>
                                         <CODTIPOEMPAQUE>0</CODTIPOEMPAQUE>
                                         <CODNATURALEZACARGA>1</CODNATURALEZACARGA>                                                  
