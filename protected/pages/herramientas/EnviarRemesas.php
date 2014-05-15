@@ -16,48 +16,45 @@ class EnviarRemesas {
     public function EnviarGuiaWebServices($arDespacho, $cliente){
         $boolResultadosEnvio = False;  
         $boolErroresDatos = FALSE;
-        if($arDespacho->EnviadoGuia == 1)
-            $boolResultadosEnvio = true;
-        else {
-            if($this->ValidarDatosGuia() == true) {
-                $strXmlGuia = array('' => $this->GenerarXMLGuia($arDespacho));
-                while ($boolResultadosEnvio == FALSE && $boolErroresDatos == FALSE) {
-                    $respuesta = "";
-                    try {
-                        $respuesta = $cliente->__soapCall('AtenderMensajeRNDC', $strXmlGuia);
-                        $cadena_xml = simplexml_load_string($respuesta);
-                        if($cadena_xml->ErrorMSG != "") {
-                            if(substr(strtoupper($cadena_xml->ErrorMSG),0,9) == "DUPLICADO") {
-                                $boolResultadosEnvio = true;                          
-                            } elseif(substr($cadena_xml->ErrorMSG, 0, 19) == "Error al abrir sesi" || substr($cadena_xml->ErrorMSG, 0, 23) == "Error al realizar conex") {
-                                sleep(3);                                
-                            }                        
-                            else {
-                                General::InsertarErrorWS(2, "Remesas", $arDespacho->IdManifiesto, utf8_decode($cadena_xml->ErrorMSG));                            
-                                $boolErroresDatos = TRUE;
-                            }
-                        }
-                        if($cadena_xml->ingresoid) {
-                            General::InsertarErrorWS(2, "Remesas", $arDespacho->IdManifiesto, utf8_decode($cadena_xml->ingresoid));                        
-                            $boolResultadosEnvio = true;
-                        }                    
-                    } catch (Exception $e) {
-                        if(substr($e, 0, 19 ) == "SoapFault exception") {
-                            sleep(3);
-                        } else { 
-                            General::InsertarErrorWS(1, "General", "", "Error al enviar parametros" . $e);
+        if($this->ValidarDatosGuia() == true) {
+            $strXmlGuia = array('' => $this->GenerarXMLGuia($arDespacho));
+            while ($boolResultadosEnvio == FALSE && $boolErroresDatos == FALSE) {
+                $respuesta = "";
+                try {
+                    $respuesta = $cliente->__soapCall('AtenderMensajeRNDC', $strXmlGuia);
+                    $cadena_xml = simplexml_load_string($respuesta);
+                    if($cadena_xml->ErrorMSG != "") {
+                        if(substr(strtoupper($cadena_xml->ErrorMSG),0,9) == "DUPLICADO") {
+                            $boolResultadosEnvio = true;                          
+                        } elseif(substr($cadena_xml->ErrorMSG, 0, 19) == "Error al abrir sesi" || substr($cadena_xml->ErrorMSG, 0, 23) == "Error al realizar conex") {
+                            sleep(3);                                
+                        }                        
+                        else {
+                            General::InsertarErrorWS(2, "Remesas", $arDespacho->IdManifiesto, utf8_decode($cadena_xml->ErrorMSG));                            
                             $boolErroresDatos = TRUE;
-                        }                                         
+                        }
+                    }
+                    if($cadena_xml->ingresoid) {
+                        General::InsertarErrorWS(2, "Remesas", $arDespacho->IdManifiesto, utf8_decode($cadena_xml->ingresoid));                        
+                        $boolResultadosEnvio = true;
                     }                    
-                }
+                } catch (Exception $e) {
+                    if(substr($e, 0, 19 ) == "SoapFault exception") {
+                        sleep(3);
+                    } else { 
+                        General::InsertarErrorWS(1, "General", "", "Error al enviar parametros" . $e);
+                        $boolErroresDatos = TRUE;
+                    }                                         
+                }                    
             }
-            else
-                $boolResultadosEnvio = false; 
-            
-            if($boolResultadosEnvio == true) {
-                $this->ActualizarGuia($arDespacho);
-            }            
+        }
+        else
+            $boolResultadosEnvio = false; 
+
+        if($boolResultadosEnvio == true) {
+            $this->ActualizarGuia($arDespacho);
         }            
+                    
         return $boolResultadosEnvio;
     }
     
