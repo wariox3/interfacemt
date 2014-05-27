@@ -15,8 +15,11 @@ class EnviarTerceros {
         $arrTercero[] =  $arDespacho->IdConductor;
         $arTercero = new TercerosRecord();
         $arTercero = TercerosRecord::finder()->FindByPk($arDespacho->IdConductor);
-        $arTercero->ActualizadoWebServices = 0;
-        $arTercero->save();        
+        if(count($arTercero) > 0) {
+            $arTercero->ActualizadoWebServices = 0;
+            $arTercero->save();        
+        }        
+
         $cliente = $objGeneral->CrearConexion();
         //Procesar array tercero
         foreach ($arrTercero as $arrTercero) {
