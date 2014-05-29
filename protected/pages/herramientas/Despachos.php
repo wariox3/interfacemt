@@ -31,6 +31,19 @@ class Despachos extends TPage {
         $this->cargarErrores();
         $this->cargarDespachos();
     }    
+
+    public function NoReportar($sender, $param) {
+        $registro = $param->Item;   
+        $intOrdDespacho = $this->DGDespachos->Datakeys[$registro->ItemIndex];                
+        $arDespachosControlMt = new DespachosControlMTRecord();
+        $arDespachosControlMt = DespachosControlMTRecord::finder()->findByPk($intOrdDespacho);
+        $arDespachosControlMt->EnvioManifiesto = 1;
+        $arDespachosControlMt->NoReportado = 1;
+        $arDespachosControlMt->save();
+        
+        $this->cargarErrores();
+        $this->cargarDespachos();
+    }        
     
     public function procesarDespacho($intOrdDespacho) {        
         $intResultados = 3;

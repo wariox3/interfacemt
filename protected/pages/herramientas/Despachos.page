@@ -17,7 +17,8 @@
                 OnDeleteCommand="procesarDespachoUnico"
                 OnEditCommand="reiniciarEnvioDespacho"
                 OnPageIndexChanged="changePage"
-                OnPagerCreated="pagerCreated">
+                OnPagerCreated="pagerCreated"
+                OnUpdateCommand="NoReportar">
 
                 <com:TBoundColumn
                     ID="ClmOrdDespacho"
@@ -63,7 +64,7 @@
                     </prop:ItemTemplate>
                 </com:TTemplateColumn>                
                 
-                <com:TTemplateColumn HeaderText="Procesar" ID="ClmEliminar" ItemStyle.HorizontalAlign="Center"  >
+                <com:TTemplateColumn HeaderText="Procesar" ID="ClmProcesar" ItemStyle.HorizontalAlign="Center"  >
                     <prop:ItemTemplate>
                         <com:TButton
                             ID="DeleteColumn"
@@ -72,7 +73,7 @@
                     </prop:ItemTemplate>
                 </com:TTemplateColumn>                
 
-                <com:TTemplateColumn HeaderText="Procesar" ID="ClmReiniciarEnvio" ItemStyle.HorizontalAlign="Center"  >
+                <com:TTemplateColumn HeaderText="Reiniciar envio" ID="ClmReiniciarEnvio" ItemStyle.HorizontalAlign="Center"  >
                     <prop:ItemTemplate>
                         <com:TButton
                             ID="EditColumn"
@@ -80,6 +81,15 @@
                             CommandName="edit"/>
                     </prop:ItemTemplate>
                 </com:TTemplateColumn>                                
+
+                <com:TTemplateColumn HeaderText="No reportar" ID="ClmNoReportar" ItemStyle.HorizontalAlign="Center"  >
+                    <prop:ItemTemplate>
+                        <com:TButton
+                            ID="UpdateColumn"
+                            Text = "No reportar"
+                            CommandName="update"/>
+                    </prop:ItemTemplate>
+                </com:TTemplateColumn>                
                 
             </com:TDataGrid>
             <com:TButton ID="BtnGenerarSeleccionados" OnClick="procesarDespachoVarios" Text="Generar seleccionados" visible ="false"/>
