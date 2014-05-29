@@ -15,6 +15,7 @@ class DespachosControlMTRecord extends TActiveRecord
         public $ExpedirRemesas;
         public $ExpedirManifiesto;
         public $Enviado;
+        public $NoReportado;
 
 	public static function finder($className=__CLASS__)
 	{
