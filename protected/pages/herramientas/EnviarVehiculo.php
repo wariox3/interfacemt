@@ -37,6 +37,7 @@ class EnviarVehiculo {
                     }
                     if($cadena_xml->ingresoid) {
                         General::InsertarErrorWS(2, "Vehiculos", $arVehiculo->IdPlaca, utf8_decode($cadena_xml->ingresoid));                        
+                        General::InsertarAprobacion("Vehiculos", $arVehiculo->IdPlaca, utf8_decode($cadena_xml->ingresoid));
                         $boolResultadosEnvio = true;
                     }                    
                 } catch (Exception $e) {           

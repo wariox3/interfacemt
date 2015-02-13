@@ -61,20 +61,10 @@
           <div class="well sidebar-nav">
             <ul class="nav nav-list">
               <li class="nav-header">Herramientas</li>
-              <li class="active"><com:THyperLink  Text="Interface despachos" NavigateUrl="?page=herramientas.Despachos"/></li>              
-              <li><com:THyperLink Text="Log errores" NavigateUrl="?page=herramientas.Despachos"/></li>
-              <li>
-                <a href="#">Datos Adicionales</a>
-              </li>             
+              <li><com:THyperLink  Text="Interface despachos" NavigateUrl="?page=herramientas.Despachos"/></li>                            
               <li class="nav-header">Control</li>
               <li>
-                <a href="#">Despachos reportados</a>
-              </li>
-              <li>
-                <a href="#">Cumplir despachos</a>
-              </li>
-              <li>
-                <a href="#">Cumplir remesas</a>
+                <li><com:THyperLink  Text="Cumplir despachos" NavigateUrl="?page=herramientas.CumplirDespachos"/></li>              
               </li>
             </ul>
           </div>

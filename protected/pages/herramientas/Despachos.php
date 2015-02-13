@@ -116,12 +116,13 @@ class Despachos extends TPage {
     }
     
     public function cargarDespachos() {
-        $strSql = "SELECT despachos_control_mt.* "
+        $strSql = "SELECT despachos_control_mt.*, despachos.FhExpedicion "
                 . "FROM despachos_control_mt "
+                . "LEFT JOIN despachos ON despachos_control_mt.OrdDespacho = despachos.OrdDespacho "                
                 . "WHERE EnvioManifiesto = 0 "
                 . "ORDER BY OrdDespacho";
         $arDespachos = new DespachosControlMTRecord();
-        $arDespachos = DespachosControlMTRecord::finder()->FindAllBySql($strSql);
+        $arDespachos = DespachosControlMTRecord::finder('DespachosControlMTExtRecord')->FindAllBySql($strSql);
         $this->DGDespachos->DataSource = $arDespachos;
         $this->DGDespachos->DataBind();        
     }    

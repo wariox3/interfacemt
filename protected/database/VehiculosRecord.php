@@ -41,6 +41,9 @@ class VehiculosRecord extends TActiveRecord
         public $ActualizadoWebServices;
         public $NumeroTecnicomecanica;
         public $FhVenceTecnicomecanica;
+        public $UsuarioSatelital;
+        public $ClaveSatelital;
+        public $PaginaSatelital;
         public $Tenedor; //Array de tipo (Tercero)        
         public $Propietario; //Array de tipo (Tercero)        
         

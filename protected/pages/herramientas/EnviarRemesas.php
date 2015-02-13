@@ -30,12 +30,13 @@ class EnviarRemesas {
                             sleep(3);                                
                         }                        
                         else {
-                            General::InsertarErrorWS(2, "Remesas", $arDespacho->IdManifiesto, utf8_decode($cadena_xml->ErrorMSG));                            
+                            General::InsertarErrorWS(2, "Remesa", $arDespacho->IdManifiesto, utf8_decode($cadena_xml->ErrorMSG));                            
                             $boolErroresDatos = TRUE;
                         }
                     }
                     if($cadena_xml->ingresoid) {
-                        General::InsertarErrorWS(2, "Remesas", $arDespacho->IdManifiesto, utf8_decode($cadena_xml->ingresoid));                        
+                        General::InsertarErrorWS(2, "Remesa", $arDespacho->IdManifiesto, utf8_decode($cadena_xml->ingresoid));                        
+                        General::InsertarAprobacion("Remesa", $arDespacho->IdManifiesto, utf8_decode($cadena_xml->ingresoid));
                         $boolResultadosEnvio = true;
                     }                    
                 } catch (Exception $e) {
@@ -71,7 +72,7 @@ class EnviarRemesas {
         $arInformacionEmpresa = InformacionEmpresaRecord::finder()->findByPk(1);
         $strExpedirRemesaXML = "";
         $dateFechaVencePoliza = substr($arInformacionEmpresa->VencePoliza, 8, 2) . "/" . substr($arInformacionEmpresa->VencePoliza, 5, 2) . "/" . substr($arInformacionEmpresa->VencePoliza, 0, 4);
-        $dateFechaCargue = substr($arDespacho->FhExpedicion, 8, 2) . "/" . substr($arDespacho->FhExpedicion, 5, 2) . "/" . substr($arDespacho->FhExpedicion, 0, 4);
+        $dateFechaCargue = substr($arDespacho->FhExpedicion, 8, 2) . "/" . substr($arDespacho->FhExpedicion, 5, 2) . "/" . substr($arDespacho->FhExpedicion, 0, 4);        
         $dateFechaPactadaCargue = substr($arDespacho->FhExpedicion, 8, 2) . "/" . substr($arDespacho->FhExpedicion, 5, 2) . "/" . substr($arDespacho->FhExpedicion, 0, 4);
         $dateFechaPactadaDescargueCargue = substr($arDespacho->FhPagoSaldo, 8, 2) . "/" . substr($arDespacho->FhPagoSaldo, 5, 2) . "/" . substr($arDespacho->FhPagoSaldo, 0, 4);
         $strExpedirRemesaXML ="<?xml version='1.0' encoding='ISO-8859-1' ?>

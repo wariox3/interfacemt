@@ -22,7 +22,13 @@ class ConfiguracionRecord extends TActiveRecord
         public $ConsecutivoGuiasFactura;
         public $ImprimirGuiaFormato;
         public $PrefijoGuiaWs;
-
+        public $ejeServidor;
+        public $ejeUsuario;
+        public $ejeClave;
+        public $ejeBaseDatos;
+        public $ejePuerto;
+        public $ejeDriver;
+        
 	public static function finder($className=__CLASS__)
 	{
 		return parent::finder($className);

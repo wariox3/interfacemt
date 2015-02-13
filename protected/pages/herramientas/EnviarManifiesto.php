@@ -37,12 +37,13 @@ class EnviarManifiesto {
                                 sleep(3);                                
                             }
                             else {
-                                General::InsertarErrorWS(2, "Manifiesto", $arDespacho->OrdDespacho, utf8_decode($cadena_xml->ErrorMSG));
+                                General::InsertarErrorWS(2, "Manifiesto", $arDespacho->IdManifiesto, utf8_decode($cadena_xml->ErrorMSG));
                                 $boolErroresDatos = TRUE;
                             }                            
                         }
                         if($cadena_xml->ingresoid) {
-                            General::InsertarErrorWS(2, "Manifiesto", $arDespacho->OrdDespacho, utf8_decode($cadena_xml->ingresoid));
+                            General::InsertarErrorWS(2, "Manifiesto", $arDespacho->IdManifiesto, utf8_decode($cadena_xml->ingresoid));
+                            General::InsertarAprobacion("Manifiesto", $arDespacho->IdManifiesto, utf8_decode($cadena_xml->ingresoid));
                             $strRegistroWS = utf8_decode($cadena_xml->ingresoid);
                             $boolResultadosEnvio = true;
                         }

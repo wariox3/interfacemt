@@ -14,11 +14,10 @@
                 HeaderStyle.CssClass="header-fondo"
                 ItemStyle.CssClass="item-style"
                 AlternatingItemStyle.CssClass="alternating-style"
-                OnDeleteCommand="procesarDespachoUnico"
-                OnEditCommand="reiniciarEnvioDespacho"
+                OnDeleteCommand="Cumplir"
+                OnEditCommand="NoCumplir"
                 OnPageIndexChanged="changePage"
-                OnPagerCreated="pagerCreated"
-                OnUpdateCommand="NoReportar">
+                OnPagerCreated="pagerCreated">
 
                 <com:TBoundColumn
                     ID="ClmOrdDespacho"
@@ -30,64 +29,49 @@
                     ID="ClmManifiesto"
                     HeaderText="Manifiesto"
                     HeaderStyle.Width="80px"
-                    DataField="ManifiestoInterno"/>                 
-                
+                    DataField="ManifiestoInterno"/>                                 
+
                 <com:TBoundColumn
                     ID="ClmFhExpedicion"
                     HeaderText="Fecha"
                     HeaderStyle.Width="80px"
-                    DataField="FhExpedicion"/>                
+                    DataField="FhExpedicion"/>                 
                 
-                <com:TBoundColumn
-                    ID="ClmEnvioPersona"
-                    HeaderText="Personas"
-                    HeaderStyle.Width="5px"
-                    DataField="EnvioPersona"/>                
-
-                <com:TBoundColumn
-                    ID="ClmEnvioVehiculo"
-                    HeaderText="Vehiculos"
-                    HeaderStyle.Width="5px"
-                    DataField="EnvioVehiculo"/>                 
-
-                <com:TBoundColumn
-                    ID="ClmEnvioGuias"
-                    HeaderText="Guias"
-                    HeaderStyle.Width="5px"
-                    DataField="EnvioGuias"/>
-
                 <com:TBoundColumn
                     ID="ClmEnvioManifiesto"
                     HeaderText="Enviado"
                     HeaderStyle.Width="5px"
-                    DataField="EnvioManifiesto"/>                                              
+                    DataField="EnvioManifiesto"/> 
                 
-                <com:TTemplateColumn HeaderText="Procesar" ID="ClmProcesar" ItemStyle.HorizontalAlign="Center"  >
+                <com:TBoundColumn
+                    ID="ClmNumeroCumplidoRemesa"
+                    HeaderText="C. Remesa"
+                    HeaderStyle.Width="5px"
+                    DataField="NumeroCumplidoRemesa"/> 
+                
+                <com:TBoundColumn
+                    ID="ClmNumeroCumplidoManifiesto"
+                    HeaderText="C. Manifiesto"
+                    HeaderStyle.Width="5px"
+                    DataField="NumeroCumplidoManifiesto"/>                                               
+                
+                <com:TTemplateColumn HeaderText="Cumplir" ID="ClmProcesar" ItemStyle.HorizontalAlign="Center"  >
                     <prop:ItemTemplate>
                         <com:TButton
                             ID="DeleteColumn"
-                            Text = "Procesar"
+                            Text = "Cumplir"
                             CommandName="delete"/>
                     </prop:ItemTemplate>
-                </com:TTemplateColumn>                
-
-                <com:TTemplateColumn HeaderText="Reiniciar envio" ID="ClmReiniciarEnvio" ItemStyle.HorizontalAlign="Center"  >
+                </com:TTemplateColumn>   
+                
+                <com:TTemplateColumn HeaderText="No cumplir" ID="ClmNoCumplir" ItemStyle.HorizontalAlign="Center"  >
                     <prop:ItemTemplate>
                         <com:TButton
                             ID="EditColumn"
-                            Text = "Reiniciar envio"
+                            Text = "No cumplir"
                             CommandName="edit"/>
                     </prop:ItemTemplate>
-                </com:TTemplateColumn>                                
-
-                <com:TTemplateColumn HeaderText="No reportar" ID="ClmNoReportar" ItemStyle.HorizontalAlign="Center"  >
-                    <prop:ItemTemplate>
-                        <com:TButton
-                            ID="UpdateColumn"
-                            Text = "No reportar"
-                            CommandName="update"/>
-                    </prop:ItemTemplate>
-                </com:TTemplateColumn>                
+                </com:TTemplateColumn> 
                 
             </com:TDataGrid>
             <com:TButton ID="BtnGenerarSeleccionados" OnClick="procesarDespachoVarios" Text="Generar seleccionados" visible ="false"/>

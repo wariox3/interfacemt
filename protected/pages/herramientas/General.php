@@ -22,6 +22,15 @@ class General{
         $arError->error = $strError;
         $arError->save();
     }
+    
+    public static function InsertarAprobacion ($strModulo, $strReferencia, $strId) {
+        $arAprobacion = new AprobacionesWSRecord();
+        $arAprobacion->fecha = date('Y-m-d H:i:s');;        
+        $arAprobacion->modulo = $strModulo;
+        $arAprobacion->referencia = $strReferencia;
+        $arAprobacion->id_aprobacion = $strId;
+        $arAprobacion->save();
+    }    
 }
 
 ?>

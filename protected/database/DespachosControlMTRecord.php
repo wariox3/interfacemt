@@ -16,10 +16,20 @@ class DespachosControlMTRecord extends TActiveRecord
         public $ExpedirManifiesto;
         public $Enviado;
         public $NoReportado;
-
+        public $Cumplido;
+        public $NumeroCumplidoRemesa;
+        public $NumeroCumplidoManifiesto;
+        public $NoCumplido;
+        
+        
 	public static function finder($className=__CLASS__)
 	{
 		return parent::finder($className);
 	}
+}
+
+class DespachosControlMTExtRecord extends DespachosControlMTRecord{
+    
+    public $FhExpedicion;
 }
 ?>

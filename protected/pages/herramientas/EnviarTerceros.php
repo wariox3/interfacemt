@@ -61,6 +61,7 @@ class EnviarTerceros {
                             }
                             if($cadena_xml->ingresoid) {
                                 General::InsertarErrorWS(2, "Personas", $arTercero->IDTercero, utf8_decode($cadena_xml->ingresoid));
+                                General::InsertarAprobacion("Personas", $arTercero->IDTercero, utf8_decode($cadena_xml->ingresoid));
                                 $boolResultadosEnvio = true;
                             }
                         } catch (Exception $e) {
