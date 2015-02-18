@@ -72,7 +72,8 @@ class DespachosRecord extends TActiveRecord
         public $FleteCorriente;
         public $ManejoCorriente;
         public $FleteCETotal;
-        public $ManejoCETotal;        
+        public $ManejoCETotal;
+        public $ExportadoContabilidad;
         public $CiudadOrigen; //Array de tipo (Ciudad)
         public $CiudadDestino; //Array de tipo (Ciudad)        
         public static $RELATIONS = array(
