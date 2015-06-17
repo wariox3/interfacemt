@@ -44,6 +44,7 @@ class VehiculosRecord extends TActiveRecord
         public $UsuarioSatelital;
         public $ClaveSatelital;
         public $PaginaSatelital;
+        public $VehiculoPropio;
         public $Tenedor; //Array de tipo (Tercero)        
         public $Propietario; //Array de tipo (Tercero)        
         
