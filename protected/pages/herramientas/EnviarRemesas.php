@@ -71,7 +71,8 @@ class EnviarRemesas {
         $arInformacionEmpresa = new InformacionEmpresaRecord();
         $arInformacionEmpresa = InformacionEmpresaRecord::finder()->findByPk(1);
         $strExpedirRemesaXML = "";
-        $strIdDestinatario = "1000".$arDespacho->IdManifiesto;
+        $strIdDestinatario = "10000".$arDespacho->IdManifiesto;
+        $strIdPropietario = "50000".$arDespacho->IdManifiesto;
         $dateFechaVencePoliza = substr($arInformacionEmpresa->VencePoliza, 8, 2) . "/" . substr($arInformacionEmpresa->VencePoliza, 5, 2) . "/" . substr($arInformacionEmpresa->VencePoliza, 0, 4);
         $dateFechaCargue = substr($arDespacho->FhExpedicion, 8, 2) . "/" . substr($arDespacho->FhExpedicion, 5, 2) . "/" . substr($arDespacho->FhExpedicion, 0, 4);        
         $dateFechaPactadaCargue = substr($arDespacho->FhExpedicion, 8, 2) . "/" . substr($arDespacho->FhExpedicion, 5, 2) . "/" . substr($arDespacho->FhExpedicion, 0, 4);
@@ -96,14 +97,14 @@ class EnviarRemesas {
                                         <MERCANCIAREMESA>009880</MERCANCIAREMESA>
                                         <CANTIDADCARGADA>$arDespacho->KilosReales</CANTIDADCARGADA>
                                         <UNIDADMEDIDACAPACIDAD>1</UNIDADMEDIDACAPACIDAD>
-                                        <CODTIPOIDREMITENTE>N</CODTIPOIDREMITENTE>
-                                        <NUMIDREMITENTE>$arConfiguracion->EmpresaWS</NUMIDREMITENTE>
+                                        <CODTIPOIDREMITENTE>C</CODTIPOIDREMITENTE>
+                                        <NUMIDREMITENTE>$strIdPropietario</NUMIDREMITENTE>
                                         <CODSEDEREMITENTE>1</CODSEDEREMITENTE>
                                         <CODTIPOIDDESTINATARIO>C</CODTIPOIDDESTINATARIO>
                                         <NUMIDDESTINATARIO>$strIdDestinatario</NUMIDDESTINATARIO>
                                         <CODSEDEDESTINATARIO>1</CODSEDEDESTINATARIO>
-                                        <CODTIPOIDPROPIETARIO>N</CODTIPOIDPROPIETARIO>
-                                        <NUMIDPROPIETARIO>$arConfiguracion->EmpresaWS</NUMIDPROPIETARIO>
+                                        <CODTIPOIDPROPIETARIO>C</CODTIPOIDPROPIETARIO>
+                                        <NUMIDPROPIETARIO>$strIdPropietario</NUMIDPROPIETARIO>
                                         <CODSEDEPROPIETARIO>1</CODSEDEPROPIETARIO>
                                         <DUENOPOLIZA>E</DUENOPOLIZA>
                                         <NUMPOLIZATRANSPORTE>$arInformacionEmpresa->NroPoliza</NUMPOLIZATRANSPORTE>

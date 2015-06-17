@@ -6,7 +6,7 @@ class EnviarTerceros {
         $booResultados = TRUE;
         $arrTercero = array();
         $arDespacho = new DespachosRecord();
-        $arDespacho = DespachosRecord::finder()->with_CiudadDestino()->FindByPk($intOrdDespacho);
+        $arDespacho = DespachosRecord::finder()->with_CiudadOrigen()->with_CiudadDestino()->FindByPk($intOrdDespacho);
         $arVehiculo = new VehiculosRecord();
         $arVehiculo = VehiculosRecord::finder()->findByPk($arDespacho->IdVehiculo);
         $arrTercero[] =  $arVehiculo->IdTenedor;
@@ -29,7 +29,10 @@ class EnviarTerceros {
         }
         if($this->EnviarDestinatarioWebServices($cliente, $arDespacho) == false){
             $booResultados = false;
-        }        
+        }     
+        if($this->EnviarRemitenteWebServices($cliente, $arDespacho) == false){
+            $booResultados = false;
+        }         
         return $booResultados;
     }
 
@@ -227,7 +230,7 @@ class EnviarTerceros {
     public function GenerarXMLDestinatario($arDespacho) {
         $arConfiguracion = new ConfiguracionRecord();
         $arConfiguracion = ConfiguracionRecord::finder()->findByPk(1);
-        $strIdDestinatario = "1000".$arDespacho->IdManifiesto;        
+        $strIdDestinatario = "10000".$arDespacho->IdManifiesto;        
         $strTerceroXML = "<?xml version='1.0' encoding='ISO-8859-1' ?>
                         <root>
                             <acceso>
@@ -250,6 +253,77 @@ class EnviarTerceros {
                                 <NUMTELEFONOCONTACTO>3333333</NUMTELEFONOCONTACTO>
                                 <NOMENCLATURADIRECCION>CALLE PRINCIPAL</NOMENCLATURADIRECCION>
                                 <CODMUNICIPIORNDC>" . $arDespacho->CiudadDestino->CodMinTrans . "</CODMUNICIPIORNDC>
+                            </variables>
+                        </root>";        
+        return $strTerceroXML;
+    }    
+    
+    public function EnviarRemitenteWebServices($cliente, $arDespacho){
+        
+        $boolResultadosEnvio = False;
+        $boolErroresDatos = FALSE;     
+        
+        $strXmlTercero = array('' => $this->GenerarXMLRemitente($arDespacho));                
+        while ($boolResultadosEnvio == FALSE && $boolErroresDatos == FALSE) {
+            $respuesta = "";
+            try {
+                $respuesta = $cliente->__soapCall('AtenderMensajeRNDC', $strXmlTercero);
+                $cadena_xml = simplexml_load_string($respuesta);
+                if($cadena_xml->ErrorMSG != "") {
+                    if(substr(strtoupper($cadena_xml->ErrorMSG),0,9) == "DUPLICADO") {
+                        $boolResultadosEnvio = TRUE;
+                    } elseif(substr($cadena_xml->ErrorMSG, 0, 19) == "Error al abrir sesi" || substr($cadena_xml->ErrorMSG, 0, 23) == "Error al realizar conex") {
+                        sleep(3);                                
+                    }
+                    else {
+                        General::InsertarErrorWS(2, "Remitente", $arDespacho->IdManifiesto, utf8_decode($cadena_xml->ErrorMSG));
+                        $boolErroresDatos = TRUE;
+                    }                            
+                }
+                if($cadena_xml->ingresoid) {
+                    General::InsertarErrorWS(2, "Remitente", $arDespacho->IdManifiesto, utf8_decode($cadena_xml->ingresoid));
+                    General::InsertarAprobacion("Remitente", $arDespacho->IdManifiesto, utf8_decode($cadena_xml->ingresoid));
+                    $boolResultadosEnvio = true;
+                }
+            } catch (Exception $e) {
+                if(substr($e, 0, 19 ) == "SoapFault exception") {
+                    sleep(3);                            
+                }
+                else {
+                    General::InsertarErrorWS(1, "General", "", "Error al enviar parametros" . $e);
+                    $boolErroresDatos = TRUE;
+                }
+            }                    
+        }                              
+        return $boolResultadosEnvio;
+    }
+    
+    public function GenerarXMLRemitente($arDespacho) {
+        $arConfiguracion = new ConfiguracionRecord();
+        $arConfiguracion = ConfiguracionRecord::finder()->findByPk(1);
+        $strIdDestinatario = "50000".$arDespacho->IdManifiesto;        
+        $strTerceroXML = "<?xml version='1.0' encoding='ISO-8859-1' ?>
+                        <root>
+                            <acceso>
+                                <username>$arConfiguracion->UsuarioWS</username>
+                                <password>$arConfiguracion->ClaveWS</password>
+                            </acceso>
+                            <solicitud>
+                                <tipo>1</tipo>
+                                <procesoid>11</procesoid>
+                            </solicitud>
+                            <variables>
+                                <NUMNITEMPRESATRANSPORTE>$arConfiguracion->EmpresaWS</NUMNITEMPRESATRANSPORTE>
+                                <CODTIPOIDTERCERO>C</CODTIPOIDTERCERO>
+                                <NUMIDTERCERO>$strIdDestinatario</NUMIDTERCERO>
+                                <NOMIDTERCERO>PROPIETARIO</NOMIDTERCERO>                                   
+                                <PRIMERAPELLIDOIDTERCERO>VARIOS</PRIMERAPELLIDOIDTERCERO>
+                                <SEGUNDOAPELLIDOIDTERCERO>VARIOS</SEGUNDOAPELLIDOIDTERCERO>                                   
+                                <CODSEDETERCERO>1</CODSEDETERCERO>
+                                <NOMSEDETERCERO>PRINCIPAL</NOMSEDETERCERO>                                    
+                                <NUMTELEFONOCONTACTO>3333333</NUMTELEFONOCONTACTO>
+                                <NOMENCLATURADIRECCION>CALLE PRINCIPAL</NOMENCLATURADIRECCION>
+                                <CODMUNICIPIORNDC>" . $arDespacho->CiudadOrigen->CodMinTrans . "</CODMUNICIPIORNDC>
                             </variables>
                         </root>";        
         return $strTerceroXML;
