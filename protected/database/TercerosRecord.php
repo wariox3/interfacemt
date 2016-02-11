@@ -24,6 +24,7 @@ class TercerosRecord extends TActiveRecord
         public $IdFormaPago;
         public $IdCentroCostos;
         public $IdAsesor;
+        public $CondicionComercial;
         public $ActualizadoWebServices;
         public $Ciudad; //Array de tipo (Conceptos)
         public static $RELATIONS = array(
